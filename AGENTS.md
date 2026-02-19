@@ -4,6 +4,8 @@
 
 - **README venv**: Updated Quick Start and Prerequisites to use `~/GitHub/venv1` instead of raw pip install; bridge commands now source the venv before running. (README.md)
 - **startup.sh**: Added orchestrated launch script with verbose pre-flight checks; starts mGBA and bridge, supports `--no-mgba`, `--quiet`, and `LATERAL_RED_VENV` env var. Cleans up mGBA on Ctrl+C. (startup.sh, README.md)
+- **docs/MGBA_SCRIPTING_REQUEST.md**: Outreach document for mGBA dev team—describes Lateral Red use case, --script support in source vs. packaged 0.10.x, questions about availability and build, workaround for building from source. (docs/MGBA_SCRIPTING_REQUEST.md)
+- **docs/MGBA_SUBMISSION_KIT.md**: Submission kit aligned with mGBA CONTRIBUTING.md—checklist, issue template, full copy-paste body for manual submission to mGBA GitHub. (docs/MGBA_SUBMISSION_KIT.md)
 - **.gitignore**: Added Python exclusions (__pycache__/, *.pyc, .venv, .egg-info, etc.). (.gitignore)
 
 ## 2026-02-18

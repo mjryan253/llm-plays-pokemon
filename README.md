@@ -235,6 +235,9 @@ llm-plays-pokemon/
   startup.sh                # Orchestrated launch (mGBA + bridge)
   requirements.txt          # Python dependencies (requests)
   AGENTS.md                 # Changelog of all accepted changes
+  docs/
+    MGBA_SCRIPTING_REQUEST.md  # mGBA dev outreach: --script, our use case
+    MGBA_SUBMISSION_KIT.md     # Copy-paste kit for submitting to mGBA (per CONTRIBUTING.md)
   gamefile/
     Pokemon_ FireRed Version.zip  # ROM file (mGBA loads directly from ZIP)
   lua/
