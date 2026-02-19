@@ -4,6 +4,100 @@ An autonomous Pokemon FireRed agent powered by local LLMs. Uses mGBA's Lua scrip
 
 > "The Nintendo way of adapting technology is not to look for the state-of-the-art... but to utilize mature technology that can be mass-produced cheaply." -- Gunpei Yokoi
 
+## Executive Summary
+
+**Lateral Red (LR-1)** is an autonomous Pokemon FireRed player that uses "withered technology" -- mature, stable tools like mGBA's Lua API and local LLMs -- to play the game without computer vision. A Lua script running inside mGBA reads game RAM every 30 frames, decrypts Pokemon data structures, and writes game state to JSON. A Python bridge polls this state, builds mode-aware prompts (overworld/dialog/battle/menu), and sends them to a local LLM (LM Studio, Ollama, llama.cpp, or llamafile). The LLM responds with JSON containing its reasoning and a chosen action, which the bridge translates into button sequences that mGBA executes.
+
+**Key Features:**
+- **No computer vision** -- reads game state directly from RAM addresses
+- **Full party + moveset awareness** -- decrypts Gen III Pokemon data including all 4 moves and PP
+- **Mode-aware AI** -- adapts action space based on game mode (overworld, dialog, battle, menu)
+- **Multi-backend LLM support** -- works with any OpenAI-compatible API or Ollama
+- **Verbose CLI output** -- watch the AI think in real-time with full prompts and responses
+- **Small model friendly** -- designed for 2B-8B parameter models running on laptops
+
+**Goal:** Beat the Elite Four with zero human intervention, narrated by the LLM's reasoning process.
+
+## Quick Start
+
+Complete setup and launch sequence:
+
+### 1. Install Prerequisites
+
+```bash
+# Install mGBA
+sudo apt install mgba-qt
+
+# Activate venv (must have requirements installed: pip install -r requirements.txt)
+cd ~/GitHub/llm-plays-pokemon  # or your project path
+source ~/GitHub/venv1/bin/activate
+```
+
+### 2. Start Your LLM Backend
+
+**Option A: LM Studio** (recommended)
+- Download and install from [lmstudio.ai](https://lmstudio.ai)
+- Load a model (e.g. Qwen 2.5 7B, Llama 3.1 8B)
+- Start the local server (default port 1234)
+- The `config.json` is already set for LM Studio at `localhost:1234`
+
+**Option B: Ollama**
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen2.5:7b
+ollama serve  # runs on port 11434
+```
+Then edit `config.json` to set `"base_url": "http://localhost:11434"` and `"model": "qwen2.5:7b"`.
+
+### 3. Launch Everything
+
+**Terminal 1: Start mGBA** (from project root)
+```bash
+cd ~/GitHub/llm-plays-pokemon
+mgba-qt gamefile/Pokemon_\ FireRed\ Version.zip
+```
+
+**In mGBA:**
+- Wait for the game to load
+- Go to **Tools > Scripting**
+- Click **File > Load Script**
+- Select `lua/game_agent.lua`
+- You should see: "Lateral Red (LR-1) game agent loaded" in the console
+
+**Terminal 2: Start the Bridge** (from project root)
+```bash
+cd ~/GitHub/llm-plays-pokemon
+source ~/GitHub/venv1/bin/activate
+python3 -m bridge
+```
+
+The bridge will:
+- Connect to your LLM backend
+- Wait for `state.json` from mGBA
+- Once it appears, start the AI playthrough
+
+### 4. Watch It Play
+
+The bridge prints verbose output showing:
+- Game state sent to the LLM
+- Raw LLM response
+- AI's thinking/narrative
+- Action chosen
+
+Run with `--quiet` for minimal output:
+```bash
+source ~/GitHub/venv1/bin/activate && python3 -m bridge --quiet
+```
+
+**Option: Use the startup script** (orchestrates mGBA + bridge, verbose pre-flight):
+```bash
+./startup.sh          # Launches both; load lua/game_agent.lua in mGBA when prompted
+./startup.sh --quiet  # Same, with minimal bridge output
+./startup.sh --no-mgba  # Bridge only (mGBA already running)
+```
+
+**Troubleshooting:** If the bridge stays on "Waiting for state.json from mGBA..." — make sure both mGBA and the bridge are started from the project root directory. The bridge writes `lua/data_dir.txt` so the Lua script knows where to write `state.json`.
+
 ## How It Works
 
 ```
@@ -24,6 +118,49 @@ The Lua script decrypts the Gen III Pokemon data structure (XOR cipher with pers
 
 The Python bridge detects the current game mode (overworld, dialog, battle, menu) and presents only the relevant actions to the LLM. In battle, the LLM sees each move's name, type, and remaining PP alongside enemy info.
 
+## CLI Output
+
+The bridge prints a verbose, color-coded play-by-play to your terminal by default:
+
+```
+══════════════════════════════════════════════════════════════════════
+  TURN 12  BATTLE  |  Route 1  (10, 14)
+──────────────────────────────────────────────────────────────────────
+  GAME STATE SENT TO LLM:
+  │ MODE: Battle
+  │
+  │ YOUR ACTIVE POKEMON:
+  │ Charmander Lv7 HP:24/26
+  │   ATK:12 DEF:11 SPD:13 SpA:12 SpD:11
+  │   Move 1: Scratch (Normal) PP:33
+  │   Move 2: Growl (Normal) PP:39
+  │   Move 3: Ember (Fire) PP:25
+  │ ...
+──────────────────────────────────────────────────────────────────────
+  Responded in 1.9s
+  RAW LLM RESPONSE:
+  │ {"narrative": "A wild Rattata. Ember is super effective against
+  │ nothing here, but Scratch has more PP. Let's use Scratch.",
+  │ "action": "fight_move_1"}
+──────────────────────────────────────────────────────────────────────
+  THINKING: A wild Rattata. Ember is super effective against nothing
+            here, but Scratch has more PP. Let's use Scratch.
+  ACTION:   fight_move_1
+```
+
+Each turn shows:
+- **Turn header** -- turn number, game mode (color-coded), map name, coordinates
+- **Game state** -- the exact prompt the LLM received
+- **Raw LLM response** -- the model's full output before parsing
+- **THINKING** -- the model's narrative reasoning
+- **ACTION** -- the chosen action sent to the game
+
+Run with `--quiet` to show only the thinking and action lines:
+
+```bash
+source ~/GitHub/venv1/bin/activate && python3 -m bridge --quiet
+```
+
 ## Prerequisites
 
 **OS:** Ubuntu / ZorinOS (or any Linux). Python 3.10+.
@@ -33,17 +170,14 @@ The Python bridge detects the current game mode (overworld, dialog, battle, menu
 sudo apt install mgba-qt
 ```
 
-**Python dependencies:**
-```bash
-pip install -r requirements.txt
-```
+**Python dependencies:** Use a venv with dependencies installed (e.g. `~/GitHub/venv1`). Activate with `source ~/GitHub/venv1/bin/activate` before running the bridge.
 
 **A local LLM backend** (pick one):
 
 | Backend | Install | Default Port |
 |---------|---------|-------------|
-| **Ollama** | `curl -fsSL https://ollama.com/install.sh \| sh` | 11434 |
 | **LM Studio** | Download from [lmstudio.ai](https://lmstudio.ai) | 1234 |
+| **Ollama** | `curl -fsSL https://ollama.com/install.sh \| sh` | 11434 |
 | **llama.cpp** | Build from [source](https://github.com/ggerganov/llama.cpp) | 8080 |
 | **llamafile** | Download from [HuggingFace](https://huggingface.co/models?sort=trending&search=llamafile) | 8080 |
 
@@ -57,39 +191,7 @@ pip install -r requirements.txt
 | Phi-3 Mini 3.8B Q4_K_M | ~2.4 GB | Fits 8GB RAM easily |
 | Gemma 2 2B | ~1.6 GB | Minimal footprint for constrained hardware |
 
-**Pokemon FireRed ROM** (US v1.0, game code BPRE) -- user-supplied, not included in this repo.
-
-## Quick Start
-
-1. **Pull a model** (Ollama example):
-   ```bash
-   ollama pull qwen2.5:7b
-   ollama serve  # if not already running
-   ```
-
-2. **Edit `config.json`** if using a different backend:
-   ```json
-   {
-     "llm": {
-       "backend": "openai-compat",
-       "base_url": "http://localhost:11434",
-       "model": "qwen2.5:7b"
-     }
-   }
-   ```
-   For LM Studio, set `base_url` to `http://localhost:1234`.
-   For llama.cpp/llamafile, set `base_url` to `http://localhost:8080`.
-
-3. **Open mGBA**, load the FireRed ROM.
-
-4. **Load the Lua script**: In mGBA, go to **Tools > Scripting**, then **File > Load Script** and select `lua/game_agent.lua`.
-
-5. **Start the bridge**:
-   ```bash
-   python3 -m bridge.main
-   ```
-
-6. Watch the AI play and narrate in the terminal.
+**Pokemon FireRed ROM** (US v1.0, game code BPRE) -- included in `gamefile/Pokemon_ FireRed Version.zip`. mGBA can load ROMs directly from ZIP archives.
 
 ## Configuration
 
@@ -99,8 +201,7 @@ All settings live in `config.json`:
 {
   "llm": {
     "backend": "openai-compat",
-    "base_url": "http://localhost:11434",
-    "model": "qwen2.5:7b",
+    "base_url": "http://localhost:1234",
     "temperature": 0.3,
     "max_tokens": 300,
     "api_key": null,
@@ -115,22 +216,33 @@ All settings live in `config.json`:
 }
 ```
 
-- **backend**: `"openai-compat"` works with Ollama (via its `/v1/` endpoint), LM Studio, llama.cpp, and llamafile. Set to `"ollama"` only if you want the native Ollama `/api/chat` endpoint.
-- **api_key**: Leave `null` for local backends. Set for cloud APIs.
-- **temperature**: Lower values (0.2-0.4) give more consistent play. Higher values are more creative but erratic.
+| Field | Description |
+|-------|-------------|
+| **backend** | `"openai-compat"` works with LM Studio, Ollama (via `/v1/`), llama.cpp, llamafile. Set to `"ollama"` for the native Ollama `/api/chat` endpoint. |
+| **base_url** | Host and port of the LLM server. No path -- the client appends it. |
+| **model** | Optional. Omit when the server serves one model (LM Studio, llamafile). Required for Ollama native API and multi-model servers. |
+| **api_key** | `null` for local backends. Set for cloud APIs. |
+| **temperature** | Lower (0.2-0.4) = more consistent play. Higher = more creative but erratic. |
+| **max_tokens** | Cap on LLM response length. 300 is enough for the JSON output. |
+| **timeout_seconds** | How long to wait for an LLM response before retrying. |
+| **history_length** | How many past turns to keep in the LLM's context window. |
 
 ## Project Structure
 
 ```
 llm-plays-pokemon/
-  config.json               # LLM + timing configuration
-  requirements.txt          # Python dependencies
+  config.json               # LLM backend + timing configuration
+  startup.sh                # Orchestrated launch (mGBA + bridge)
+  requirements.txt          # Python dependencies (requests)
+  AGENTS.md                 # Changelog of all accepted changes
+  gamefile/
+    Pokemon_ FireRed Version.zip  # ROM file (mGBA loads directly from ZIP)
   lua/
-    game_agent.lua          # mGBA Lua script (RAM reader, command executor)
+    game_agent.lua          # mGBA Lua script (RAM reader, decrypter, command executor)
   bridge/
     __init__.py
-    main.py                 # Main loop, action-to-button translator
-    llm_client.py           # Universal LLM client
+    main.py                 # Main loop, CLI output, action-to-button translator
+    llm_client.py           # Universal LLM client (OpenAI-compat / Ollama native)
     prompt.py               # Mode-aware prompt builder + response parser
     pokemon_data.py         # Species/move/map name lookup tables (Gen III)
   data/
@@ -156,3 +268,4 @@ In battle mode, moves with 0 PP are excluded from the action list, and only part
 - **Gen III encryption** is handled in Lua: the 48-byte Pokemon data section is XOR-decrypted using `personality_value XOR ot_id`, with substructure order determined by `personality_value % 24`.
 - **File-based IPC** between mGBA and Python via `data/state.json` and `data/command.json`. Atomic writes (write to `.tmp`, then rename) prevent partial reads.
 - **Anti-loop detection** warns the LLM when it has been at the same position for 5+ turns or repeating the same action 4+ times.
+- **Model-agnostic** -- the `model` field is optional in config. LM Studio, llamafile, and single-model servers work without it. The bridge talks to whatever the server is running.

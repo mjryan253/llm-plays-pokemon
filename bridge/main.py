@@ -275,10 +275,22 @@ def main():
 
     config = load_config()
     data_dir = config.get("data_dir", "data")
-    state_path = os.path.join(data_dir, "state.json")
-    cmd_path = os.path.join(data_dir, "command.json")
+    project_root = os.getcwd()
+    data_dir_abs = os.path.abspath(data_dir)
+    state_path = os.path.join(data_dir_abs, "state.json")
+    cmd_path = os.path.join(data_dir_abs, "command.json")
     poll_interval = config.get("state_poll_interval_seconds", 0.5)
     max_history = config.get("history_length", 10)
+
+    os.makedirs(data_dir_abs, exist_ok=True)
+
+    # So mGBA's Lua script can find the same data dir (when mGBA is run from project root)
+    lua_data_dir_file = os.path.join(project_root, "lua", "data_dir.txt")
+    try:
+        with open(lua_data_dir_file, "w") as f:
+            f.write(data_dir_abs + "\n")
+    except OSError:
+        pass
 
     llm = LLMClient(config.get("llm", {}))
 
