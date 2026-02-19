@@ -1,0 +1,32 @@
+---
+description: Require AGENTS.md changelog entries and documentation updates for all code changes
+alwaysApply: true
+---
+
+# Changelog and Documentation Rules
+
+## AGENTS.md Changelog
+
+When code changes are accepted into the repository, append a concise entry to `AGENTS.md` at the project root. Create the file if it does not exist.
+
+Format:
+
+```
+## YYYY-MM-DD
+
+- **<area>**: <what changed and why> (<files touched>)
+```
+
+- One bullet per logical change, not per file.
+- Group related changes under a single date heading.
+- Keep entries factual and brief (1-2 lines each).
+
+## Documentation Updates
+
+Whenever code is added or modified, update all relevant documentation **in the same changeset**:
+
+- **README.md** -- keep setup steps, configuration examples, project structure, and feature descriptions in sync with the current code.
+- **Inline docstrings / comments** -- update any function or module docstrings that describe behavior you changed.
+- **config.json** -- if new config keys are added or defaults change, reflect them in the README's configuration section.
+
+Do not leave documentation describing behavior that no longer exists, or omit documentation for newly added features.

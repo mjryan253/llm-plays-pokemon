@@ -1,0 +1,16 @@
+{
+  "llm": {
+    "backend": "openai-compat",
+    "base_url": "http://localhost:1234",
+    "temperature": 0.3,
+    "max_tokens": 300,
+    "api_key": null,
+    "timeout_seconds": 30
+  },
+  "data_dir": "data",
+  "state_poll_interval_seconds": 0.5,
+  "history_length": 10,
+  "lua": {
+    "frame_poll_interval": 30
+  }
+}
