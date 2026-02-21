@@ -1,3 +1,6 @@
+# Logs from startup.sh (LPP-YYYY-MM-DD-HH-MM-SS.txt)
+logs/
+
 # Bridge writes machine-specific absolute path; Lua reads it at runtime
 lua/data_dir.txt
 # Runtime exchange (state + command) — do not commit

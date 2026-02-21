@@ -19,10 +19,20 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
 # Parse flags
 START_MGBA=true
 BRIDGE_QUIET=""
+NO_TAIL=false
+NO_LOG=false
 while [[ $# -gt 0 ]]; do
   case $1 in
     --no-mgba)
       START_MGBA=false
+      shift
+      ;;
+    --no-tail)
+      NO_TAIL=true
+      shift
+      ;;
+    --no-log)
+      NO_LOG=true
       shift
       ;;
     -q|--quiet)
@@ -36,11 +46,14 @@ while [[ $# -gt 0 ]]; do
       echo ""
       echo "Options:"
       echo "  --no-mgba    Skip launching mGBA (use when already running)"
+      echo "  --no-tail    Skip spawning a separate terminal for log tail"
+      echo "  --no-log     Skip logging output to logs/ (no tee, no tail window)"
       echo "  -q, --quiet  Run bridge with --quiet (minimal output)"
       echo "  -h, --help   Show this help"
       echo ""
       echo "Environment:"
       echo "  LATERAL_RED_VENV   Venv path (default: \$HOME/GitHub/venv1)"
+      echo "  LATERAL_RED_NO_TAIL  Set to 1 to disable tail window"
       exit 0
       ;;
     *)
@@ -51,6 +64,66 @@ while [[ $# -gt 0 ]]; do
 done
 
 MGBA_PID=""
+
+# ---------------------------------------------------------------------------
+# Log setup (tee all output to timestamped log file) — skipped if --no-log
+# ---------------------------------------------------------------------------
+if ! $NO_LOG; then
+  mkdir -p "$PROJECT_ROOT/logs"
+  LOG_FILE="$PROJECT_ROOT/logs/LPP-$(date +%Y-%m-%d-%H-%M-%S).txt"
+  touch "$LOG_FILE"
+
+  # Spawn separate terminal with tail -f (unless disabled)
+  if [[ -z "$LATERAL_RED_NO_TAIL" || "$LATERAL_RED_NO_TAIL" != "1" ]] && ! $NO_TAIL && [[ -n "$DISPLAY" ]]; then
+  SPAWNED_TAIL=false
+  if [[ -n "$LATERAL_RED_TAIL_TERM" ]]; then
+    if command -v "$LATERAL_RED_TAIL_TERM" &>/dev/null; then
+      case "$LATERAL_RED_TAIL_TERM" in
+        gnome-terminal)
+          gnome-terminal -q -- tail -f "$LOG_FILE" &
+          SPAWNED_TAIL=true
+          ;;
+        xfce4-terminal)
+          xfce4-terminal -e "tail -f \"$LOG_FILE\"" &
+          SPAWNED_TAIL=true
+          ;;
+        konsole)
+          konsole -e "tail -f \"$LOG_FILE\"" &
+          SPAWNED_TAIL=true
+          ;;
+        xterm)
+          xterm -e "tail -f \"$LOG_FILE\"" &
+          SPAWNED_TAIL=true
+          ;;
+        *)
+          "$LATERAL_RED_TAIL_TERM" -e "tail -f \"$LOG_FILE\"" &
+          SPAWNED_TAIL=true
+          ;;
+      esac
+    fi
+  else
+    if command -v gnome-terminal &>/dev/null; then
+      gnome-terminal -q -- tail -f "$LOG_FILE" &
+      SPAWNED_TAIL=true
+    elif command -v xfce4-terminal &>/dev/null; then
+      xfce4-terminal -e "tail -f \"$LOG_FILE\"" &
+      SPAWNED_TAIL=true
+    elif command -v konsole &>/dev/null; then
+      konsole -e "tail -f \"$LOG_FILE\"" &
+      SPAWNED_TAIL=true
+    elif command -v xterm &>/dev/null; then
+      xterm -e "tail -f \"$LOG_FILE\"" &
+      SPAWNED_TAIL=true
+    fi
+  fi
+  if $SPAWNED_TAIL; then
+    sleep 0.5
+  fi
+  fi
+
+  # Tee all output to log file and terminal
+  exec > >(tee -a "$LOG_FILE") 2>&1
+fi
 
 # ---------------------------------------------------------------------------
 # Cleanup on exit
@@ -74,6 +147,9 @@ echo ""
 echo "═══════════════════════════════════════════════════════════════"
 echo "  LATERAL RED (LR-1) — Orchestrated Startup"
 echo "═══════════════════════════════════════════════════════════════"
+if ! $NO_LOG; then
+  echo "  Log file: $LOG_FILE"
+fi
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -121,26 +197,30 @@ fi
 echo "      -> config.json"
 echo ""
 
-echo "[6/6] Ensuring data directory..."
+echo "[6/6] Ensuring data directory and Lua script..."
 mkdir -p "$PROJECT_ROOT/data"
+if [[ ! -f "$PROJECT_ROOT/lua/game_agent.lua" ]]; then
+  echo "      ERROR: lua/game_agent.lua not found"
+  exit 1
+fi
 echo "      -> $PROJECT_ROOT/data"
+echo "      -> lua/game_agent.lua"
 echo ""
 
 # ---------------------------------------------------------------------------
 # Start mGBA (if requested)
 # ---------------------------------------------------------------------------
 if $START_MGBA; then
+  LUA_SCRIPT="$PROJECT_ROOT/lua/game_agent.lua"
   echo "───────────────────────────────────────────────────────────────"
   echo "  Starting mGBA (background)"
   echo "───────────────────────────────────────────────────────────────"
   echo "  -> ROM: $ROM_FULL"
-  echo "  -> CWD: $PROJECT_ROOT (required for Lua script paths)"
-  echo ""
-  echo "  MANUAL STEP: In mGBA, load the game agent:"
-  echo "    Tools > Scripting > File > Load Script > lua/game_agent.lua"
+  echo "  -> Script: --script $LUA_SCRIPT (auto-loaded, mGBA 0.11+)"
+  echo "  -> CWD: $PROJECT_ROOT (required for Lua data paths)"
   echo ""
   cd "$PROJECT_ROOT"
-  "$MGBA_BIN" "$ROM_FULL" &
+  "$MGBA_BIN" --script "$LUA_SCRIPT" "$ROM_FULL" &
   MGBA_PID=$!
   echo "  -> mGBA started (PID $MGBA_PID)"
   echo "  -> Waiting 3s for mGBA to initialize..."
@@ -149,7 +229,7 @@ if $START_MGBA; then
 else
   echo "───────────────────────────────────────────────────────────────"
   echo "  Skipping mGBA (--no-mgba); ensure it is already running"
-  echo "  and that the Lua script is loaded from project root."
+  echo "  with lua/game_agent.lua loaded (--script or Tools > Scripting)."
   echo "───────────────────────────────────────────────────────────────"
   echo ""
 fi

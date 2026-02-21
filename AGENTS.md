@@ -1,5 +1,16 @@
 # AGENTS.md -- Lateral Red (LR-1) Changelog
 
+*Last updated: 2026-02-20*
+
+## 2026-02-20
+
+- **mGBA Linux limitation**: Documented that published mGBA (0.10.5) on Linux has `--script` disabled; users need 0.11+ from [development downloads](https://mgba.io/downloads.html#development-downloads). (README.md, docs/getting-started.md, docs/troubleshooting.md)
+- **Documentation last-updated dates**: Added "Last updated: 2026-02-20" footer to README.md, AGENTS.md, guide-doc.md, and all docs/*.md files.
+- **startup.sh --no-log**: Added `--no-log` flag to skip logging (no tee, no tail window). Logging remains on by default. (startup.sh, README.md, docs/getting-started.md)
+- **startup.sh logging and tail terminal**: All output is teed to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt`. Spawns a separate terminal with `tail -f` (gnome-terminal, xfce4-terminal, konsole, xterm). Added `--no-tail` flag and `LATERAL_RED_NO_TAIL` env var. `logs/` added to .gitignore. (startup.sh, .gitignore, README.md, docs/getting-started.md, docs/reference.md)
+- **docs/ + Diátaxis restructure**: Reorganized documentation into `docs/` using the Diátaxis framework. Created `getting-started.md`, `architecture.md`, `reference.md`, `troubleshooting.md`, and `docs/README.md` index. Slimmed main README to ~70 lines with links to detailed docs. Superseded `guide-doc.md` with redirect to `docs/architecture.md`. Updated changelog-and-docs rule to include `docs/`. (docs/, README.md, guide-doc.md, .cursor/rules/changelog-and-docs.mdc)
+- **mGBA 0.11 --script**: Integrated mGBA 0.11 `--script FILE` flag to auto-load the Lua game agent on launch. `startup.sh` now passes `--script lua/game_agent.lua`; manual step removed. README updated with `--script` usage and fallback for mGBA 0.10. (startup.sh, README.md)
+
 ## 2026-02-19
 
 - **README venv**: Updated Quick Start and Prerequisites to use `~/GitHub/venv1` instead of raw pip install; bridge commands now source the venv before running. (README.md)
