@@ -1,5 +1,5 @@
 #!/bin/bash
-# Lateral Red (LR-1) -- Orchestrated startup
+# LLM Plays Pokemon -- Orchestrated startup
 # Launches mGBA and the Python bridge with verbose pre-flight checks.
 
 set -e
@@ -7,16 +7,17 @@ set -e
 # ---------------------------------------------------------------------------
 # Configuration (override with environment variables)
 # ---------------------------------------------------------------------------
-ROM_PATH="gamefile/Pokemon_ FireRed Version.zip"
+ROM_PATH="../gamefile/Pokemon_ FireRed Version.zip"
 
 # ---------------------------------------------------------------------------
 # Resolve paths
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
+REPO_ROOT="$(cd "$PROJECT_ROOT/.." && pwd)"
 PROJECT_VENV="$PROJECT_ROOT/.venv"
-if [[ -n "$LATERAL_RED_VENV" && -f "$LATERAL_RED_VENV/bin/python" ]]; then
-  VENV="$LATERAL_RED_VENV"
+if [[ -n "$LPP_VENV" && -f "$LPP_VENV/bin/python" ]]; then
+  VENV="$LPP_VENV"
 else
   VENV="$PROJECT_VENV"
 fi
@@ -47,7 +48,7 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Usage: $0 [OPTIONS]"
       echo ""
-      echo "  Launches mGBA (with ROM) and the Lateral Red bridge."
+      echo "  Launches mGBA (with ROM) and the LLM Plays Pokemon bridge."
       echo ""
       echo "Options:"
       echo "  --no-mgba    Skip launching mGBA (use when already running)"
@@ -57,8 +58,8 @@ while [[ $# -gt 0 ]]; do
       echo "  -h, --help   Show this help"
       echo ""
       echo "Environment:"
-      echo "  LATERAL_RED_VENV   Venv path (default: <project>/.venv)"
-      echo "  LATERAL_RED_NO_TAIL  Set to 1 to disable tail window"
+      echo "  LPP_VENV   Venv path (default: <project>/.venv)"
+      echo "  LPP_NO_TAIL  Set to 1 to disable tail window"
       exit 0
       ;;
     *)
@@ -74,16 +75,16 @@ MGBA_PID=""
 # Log setup (tee all output to timestamped log file) — skipped if --no-log
 # ---------------------------------------------------------------------------
 if ! $NO_LOG; then
-  mkdir -p "$PROJECT_ROOT/logs"
-  LOG_FILE="$PROJECT_ROOT/logs/LPP-$(date +%Y-%m-%d-%H-%M-%S).txt"
+  mkdir -p "$REPO_ROOT/logs"
+  LOG_FILE="$REPO_ROOT/logs/LPP-$(date +%Y-%m-%d-%H-%M-%S).txt"
   touch "$LOG_FILE"
 
   # Spawn separate terminal with tail -f (unless disabled)
-  if [[ -z "$LATERAL_RED_NO_TAIL" || "$LATERAL_RED_NO_TAIL" != "1" ]] && ! $NO_TAIL && [[ -n "$DISPLAY" ]]; then
+  if [[ -z "$LPP_NO_TAIL" || "$LPP_NO_TAIL" != "1" ]] && ! $NO_TAIL && [[ -n "$DISPLAY" ]]; then
   SPAWNED_TAIL=false
-  if [[ -n "$LATERAL_RED_TAIL_TERM" ]]; then
-    if command -v "$LATERAL_RED_TAIL_TERM" &>/dev/null; then
-      case "$LATERAL_RED_TAIL_TERM" in
+  if [[ -n "$LPP_TAIL_TERM" ]]; then
+    if command -v "$LPP_TAIL_TERM" &>/dev/null; then
+      case "$LPP_TAIL_TERM" in
         gnome-terminal)
           gnome-terminal -q -- tail -f "$LOG_FILE" &
           SPAWNED_TAIL=true
@@ -101,7 +102,7 @@ if ! $NO_LOG; then
           SPAWNED_TAIL=true
           ;;
         *)
-          "$LATERAL_RED_TAIL_TERM" -e "tail -f \"$LOG_FILE\"" &
+          "$LPP_TAIL_TERM" -e "tail -f \"$LOG_FILE\"" &
           SPAWNED_TAIL=true
           ;;
       esac
@@ -150,7 +151,7 @@ trap cleanup EXIT INT TERM
 # ---------------------------------------------------------------------------
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
-echo "  LATERAL RED (LR-1) — Orchestrated Startup"
+echo "  LLM PLAYS POKEMON — Orchestrated Startup"
 echo "═══════════════════════════════════════════════════════════════"
 if ! $NO_LOG; then
   echo "  Log file: $LOG_FILE"
@@ -169,7 +170,7 @@ echo "[2/9] Checking mGBA (0.11+ required for --script)..."
 if ! command -v mgba-qt &>/dev/null; then
   echo "      ERROR: mgba-qt not found in PATH"
   echo "      Install: sudo apt install mgba-qt"
-  echo "      See docs/getting-started.md and docs/troubleshooting.md"
+  echo "      See ../docs/getting-started.md and ../docs/troubleshooting.md"
   exit 1
 fi
 MGBA_BIN="$(command -v mgba-qt)"
@@ -179,7 +180,7 @@ version_ge() { test "$(printf '%s\n' "$1" "$2" | sort -V | head -1)" = "$2"; }
 if ! version_ge "${MGBA_VERSION:-0}" "0.11"; then
   echo "      ERROR: mGBA version ${MGBA_VERSION:-unknown} is below 0.11"
   echo "      --script requires mGBA 0.11+. On Linux, packaged 0.10.5 has --script disabled."
-  echo "      See docs/getting-started.md and docs/troubleshooting.md for mGBA 0.11+ / development downloads."
+  echo "      See ../docs/getting-started.md and ../docs/troubleshooting.md for mGBA 0.11+ / development downloads."
   exit 1
 fi
 echo "      -> $MGBA_BIN"
@@ -203,14 +204,14 @@ echo "[4/9] Checking Ollama..."
 if ! command -v ollama &>/dev/null; then
   echo "      ERROR: ollama not found in PATH"
   echo "      Ollama must be installed for the default LLM backend."
-  echo "      See docs/getting-started.md (Prerequisites, Step 1) for install and setup."
+  echo "      See ../docs/getting-started.md (Prerequisites, Step 1) for install and setup."
   exit 1
 fi
 echo "      -> $(command -v ollama)"
 echo ""
 
 echo "[5/9] Checking ROM file..."
-ROM_FULL="$PROJECT_ROOT/$ROM_PATH"
+ROM_FULL="$(cd "$PROJECT_ROOT" && realpath "$ROM_PATH" 2>/dev/null || echo "$PROJECT_ROOT/$ROM_PATH")"
 if [[ ! -f "$ROM_FULL" ]]; then
   echo "      ERROR: ROM not found at $ROM_PATH"
   exit 1
@@ -238,7 +239,7 @@ echo ""
 
 echo "[8/9] Ollama server..."
 echo "      Please start the Ollama server (ollama serve) if not already running."
-echo "      See docs/getting-started.md for details."
+echo "      See ../docs/getting-started.md for details."
 echo "      Press Enter to continue, or wait 60 seconds to proceed automatically..."
 if [[ -t 0 ]]; then
   (

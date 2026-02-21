@@ -1,53 +1,85 @@
-# Lateral Red (LR-1)
+# LLM Plays Pokemon
 
-An autonomous Pokemon FireRed agent powered by local LLMs. Uses mGBA's Lua scripting to read game memory directly — no computer vision required — and feeds structured game state to a small language model that decides what to do next.
+An autonomous Pokemon FireRed agent powered by local LLMs. Two approaches to the same goal: an LLM beating Pokemon FireRed with zero human intervention.
 
 > "The Nintendo way of adapting technology is not to look for the state-of-the-art... but to utilize mature technology that can be mass-produced cheaply." — Gunpei Yokoi
 
-## Summary
+## Components
 
-**Lateral Red (LR-1)** uses "withered technology" — mGBA's Lua API and local LLMs — to play Pokemon FireRed without computer vision. A Lua script reads RAM every 30 frames and writes game state to JSON. A Python bridge polls this, builds mode-aware prompts, and sends them to an LLM (Ollama, LM Studio, llama.cpp, llamafile). The LLM responds with reasoning and an action; the bridge translates that into button sequences for mGBA.
+| Component | Description | Architecture | Status |
+|-----------|-------------|--------------|--------|
+| [pygba/](pygba/) | Pure Python via mGBA bindings | Single process, direct RAM access, streaming LLM, hierarchical planner | New |
+| [mgba-lua/](mgba-lua/) | Lua + Python bridge via file IPC | mGBA Lua script ↔ JSON files ↔ Python bridge | Stable |
 
-**Key features:**
-- **No computer vision** — reads game state from RAM addresses
-- **Full party + moveset awareness** — decrypts Gen III Pokemon data including all 4 moves and PP
-- **Mode-aware AI** — adapts actions for overworld, dialog, battle, menu
-- **Multi-backend LLM support** — works with any OpenAI-compatible API
-- **Small model friendly** — designed for 2B–8B models on laptops
-
-**Goal:** Beat the Elite Four with zero human intervention, narrated by the LLM.
+Both components read game memory directly — no computer vision — and feed structured state to a local LLM that decides what to do next.
 
 ## Quick Start
 
-1. **Prerequisites:** mGBA 0.11+ (on Linux, use [development downloads](https://mgba.io/downloads.html#development-downloads) — packaged 0.10.5 has `--script` disabled), Python 3.10+, Ollama installed, ROM in `gamefile/`. The startup script creates a project `.venv` and installs deps automatically.
-2. **Run:** `./startup.sh` — checks mGBA version, creates `.venv`, checks Ollama, prompts to start `ollama serve`, then launches mGBA + bridge (output logged to `logs/`). Use `--no-tail` or `--no-log` if needed.
-3. **Alternate:** Launch [manually](docs/getting-started.md#4-optional-manual-launch) with separate mGBA and bridge terminals; see [docs/getting-started.md](docs/getting-started.md) for LLM backends.
+**Prerequisites:** Python 3.10+, Ollama, ROM in `gamefile/`.
 
-**Troubleshooting:** Bridge stuck on "Waiting for state.json"? Start both mGBA and the bridge from the project root. See [docs/troubleshooting.md](docs/troubleshooting.md).
+**Option A — pygba** (recommended):
+
+Requires mGBA built with Python bindings (see [pygba/README.md](pygba/README.md) or run `bash pygba/setup_mgba.sh`).
+
+```bash
+cd pygba && pip install -r requirements.txt
+ollama pull qwen2.5:7b && ollama serve   # in another terminal
+python -m pygba
+```
+
+**Option B — mgba-lua** (legacy):
+
+Requires mGBA 0.11+ (on Linux, use [development downloads](https://mgba.io/downloads.html#development-downloads)).
+
+```bash
+cd mgba-lua && ./startup.sh
+```
+
+See [docs/getting-started.md](docs/getting-started.md) for full setup, LLM backend options, and ROM guidance.
+
+## Shared Assets
+
+- `gamefile/` — place your legally owned FireRed/LeafGreen ROM here
+- `docs/` — full documentation (covers both components)
+- `logs/` — output logs from either component
 
 ## Documentation
 
 | Doc | Description |
 |-----|-------------|
-| [Getting Started](docs/getting-started.md) | Full setup tutorial, prerequisites, first run |
-| [Architecture](docs/architecture.md) | System design, philosophy, data flow |
-| [Reference](docs/reference.md) | Config, game modes, project structure |
+| [Getting Started](docs/getting-started.md) | Setup tutorial for both components |
+| [Architecture](docs/architecture.md) | System design and philosophy |
+| [Reference](docs/reference.md) | Config schemas, project structure, RAM addresses |
 | [Troubleshooting](docs/troubleshooting.md) | Common issues and fixes |
 
 ## Project Structure
 
 ```
 llm-plays-pokemon/
-  config.json          # LLM backend + timing
-  startup.sh           # Orchestrated launch
-  gamefile/            # Place your legally owned FireRed/LeafGreen ROM here (see docs)
-  lua/game_agent.lua   # mGBA script (RAM reader, command executor)
-  bridge/              # Python: main loop, LLM client, prompts
-  data/                # state.json, command.json (runtime)
-  docs/                # Documentation
+  AGENTS.md                # Changelog
+  README.md                # This file
+  gamefile/                 # ROM directory (user-supplied)
+  logs/                    # Output logs
+  docs/                    # Shared documentation (Diátaxis)
+  pygba/                   # Pure Python agent (mGBA bindings)
+    config.json            # ROM path, LLM, planner settings
+    setup_mgba.sh          # Build mGBA with Python bindings
+    agent.py               # Main loop + streaming terminal display
+    emulator.py            # mgba.core wrapper
+    game_state.py          # RAM reader + Gen III decryption
+    planner.py             # Hierarchical goal stack
+    navigator.py           # BFS pathfinding (70-node map graph)
+    llm_client.py          # Streaming Ollama/OpenAI client
+    prompt.py              # Multi-action prompt builder
+  mgba-lua/                # Lua + Python bridge (file IPC)
+    config.json            # LLM backend + timing
+    startup.sh             # Orchestrated launch
+    lua/game_agent.lua     # mGBA Lua agent (RAM reader)
+    bridge/                # Python: main loop, LLM client, prompts
+    data/                  # state.json, command.json (runtime)
 ```
 
-See [docs/reference.md](docs/reference.md) for full structure and config details.
+See [docs/reference.md](docs/reference.md) for full details.
 
 ---
 *Last updated: 2026-02-21*

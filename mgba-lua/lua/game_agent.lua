@@ -1,4 +1,4 @@
--- Lateral Red (LR-1) -- mGBA Game Agent
+-- LLM Plays Pokemon -- mGBA Game Agent
 -- Reads Pokemon FireRed (US v1.0 / BPRE) RAM, writes state.json, reads command.json
 
 ---------------------------------------------------------------------------
@@ -525,7 +525,7 @@ end
 ---------------------------------------------------------------------------
 -- Bootstrap
 ---------------------------------------------------------------------------
-console:log("Lateral Red (LR-1) game agent loaded")
+console:log("LLM Plays Pokemon game agent loaded")
 console:log("State file: " .. STATE_FILE)
 console:log("Command file: " .. CMD_FILE)
 console:log("Polling every " .. FRAME_POLL .. " frames")

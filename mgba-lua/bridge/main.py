@@ -1,5 +1,5 @@
 """
-Lateral Red (LR-1) -- Main Bridge Loop
+LLM Plays Pokemon -- Main Bridge Loop
 
 Polls state.json from the Lua agent, sends the game state to a local LLM,
 parses the response, and writes a button-sequence command back.
@@ -23,7 +23,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
 )
-log = logging.getLogger("lateral-red")
+log = logging.getLogger("llm-plays-pokemon")
 
 # -----------------------------------------------------------------------
 # Terminal colors (ANSI, works on every modern terminal)
@@ -267,7 +267,7 @@ class LoopDetector:
 # -----------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Lateral Red (LR-1) -- Pokemon FireRed AI Bridge")
+    parser = argparse.ArgumentParser(description="LLM Plays Pokemon -- Pokemon FireRed AI Bridge")
     parser.add_argument("-q", "--quiet", action="store_true",
                         help="Minimal output: only show narrative + action per turn")
     args = parser.parse_args()
@@ -296,7 +296,7 @@ def main():
 
     # Startup banner
     print()
-    print(f"{C.BOLD}{C.CYAN}  LATERAL RED (LR-1){C.RESET}")
+    print(f"{C.BOLD}{C.CYAN}  LLM PLAYS POKEMON{C.RESET}")
     print(f"  Autonomous Pokemon FireRed Agent")
     print(_separator("─"))
     print(f"  Backend : {C.BOLD}{llm.backend}{C.RESET} @ {llm.base_url}")

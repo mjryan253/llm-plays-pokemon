@@ -1,0 +1,18 @@
+{
+  "rom_path": "../gamefile/Pokemon FireRed.gba",
+  "save_path": null,
+  "log_dir": "../logs",
+  "llm": {
+    "backend": "ollama",
+    "base_url": "http://localhost:11434",
+    "model": "qwen2.5:7b",
+    "temperature": 0.3,
+    "max_tokens": 512,
+    "timeout_seconds": 60
+  },
+  "planner": {
+    "strategic_interval": 50,
+    "max_plan_length": 20,
+    "battle_plan_length": 3
+  }
+}

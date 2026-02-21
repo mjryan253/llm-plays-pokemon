@@ -5,15 +5,25 @@ logs/
 gamefile/*
 !gamefile/Not-a-real-pokemon-ROM
 
+# ---------------------------------------------------------------------------
+# mgba-lua component
+# ---------------------------------------------------------------------------
 # Bridge writes machine-specific absolute path; Lua reads it at runtime
-lua/data_dir.txt
+mgba-lua/lua/data_dir.txt
 # Runtime exchange (state + command) — do not commit
-data/state.json
-data/state.json.tmp
-data/command.json
-data/command.json.tmp
+mgba-lua/data/state.json
+mgba-lua/data/state.json.tmp
+mgba-lua/data/command.json
+mgba-lua/data/command.json.tmp
 
-# Python
+# ---------------------------------------------------------------------------
+# pygba component
+# ---------------------------------------------------------------------------
+pygba/.venv/
+
+# ---------------------------------------------------------------------------
+# Python (all components)
+# ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
