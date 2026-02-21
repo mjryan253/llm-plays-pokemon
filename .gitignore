@@ -2,7 +2,8 @@
 logs/
 
 # User-supplied ROM and save files (not distributable)
-gamefile/
+gamefile/*
+!gamefile/Not-a-real-pokemon-ROM
 
 # Bridge writes machine-specific absolute path; Lua reads it at runtime
 lua/data_dir.txt
