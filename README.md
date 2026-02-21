@@ -19,9 +19,9 @@ An autonomous Pokemon FireRed agent powered by local LLMs. Uses mGBA's Lua scrip
 
 ## Quick Start
 
-1. **Prerequisites:** mGBA 0.11+ (on Linux, use [development downloads](https://mgba.io/downloads.html#development-downloads) — packaged 0.10.5 has `--script` disabled), Python 3.10+, venv with `pip install -r requirements.txt`
-2. **LLM:** Start Ollama (port 11434) — or LM Studio — see [docs/getting-started.md](docs/getting-started.md)
-3. **Run:** `./startup.sh` (launches mGBA + bridge together; output logged to `logs/`). Use `--no-tail` or `--no-log` if needed. Or launch [manually](docs/getting-started.md#3-launch-mgba-and-bridge) with separate mGBA and bridge terminals.
+1. **Prerequisites:** mGBA 0.11+ (on Linux, use [development downloads](https://mgba.io/downloads.html#development-downloads) — packaged 0.10.5 has `--script` disabled), Python 3.10+, Ollama installed, ROM in `gamefile/`. The startup script creates a project `.venv` and installs deps automatically.
+2. **Run:** `./startup.sh` — checks mGBA version, creates `.venv`, checks Ollama, prompts to start `ollama serve`, then launches mGBA + bridge (output logged to `logs/`). Use `--no-tail` or `--no-log` if needed.
+3. **Alternate:** Launch [manually](docs/getting-started.md#4-optional-manual-launch) with separate mGBA and bridge terminals; see [docs/getting-started.md](docs/getting-started.md) for LLM backends.
 
 **Troubleshooting:** Bridge stuck on "Waiting for state.json"? Start both mGBA and the bridge from the project root. See [docs/troubleshooting.md](docs/troubleshooting.md).
 

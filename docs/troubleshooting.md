@@ -2,6 +2,40 @@
 
 Common issues and how to fix them.
 
+## mGBA Version Too Old
+
+**Symptom:** `./startup.sh` exits with "mGBA version X.X is below 0.11" or similar.
+
+**Cause:** The startup script requires mGBA 0.11+ for `--script` auto-load. On Linux, the packaged release (0.10.5) has `--script` disabled even though it appears in `--help`.
+
+**Fix:**
+
+1. Get mGBA 0.11+ from the [development downloads](https://mgba.io/downloads.html#development-downloads) (Ubuntu AppImage or build from source).
+2. Or build from source. See the mGBA repo for build instructions.
+3. Verify: run `mgba-qt --version` — you should see 0.11 or higher.
+
+See [Getting Started](getting-started.md) Prerequisites for more detail.
+
+---
+
+## Ollama Not Installed
+
+**Symptom:** `./startup.sh` exits with "ollama not found in PATH".
+
+**Cause:** The default config uses Ollama. The script checks for `ollama` before launch.
+
+**Fix:**
+
+1. Install Ollama: `curl -fsSL https://ollama.com/install.sh | sh`
+2. Pull a model: `ollama pull qwen2.5:7b`
+3. Start the server when prompted by the script, or run `ollama serve` in a separate terminal before `./startup.sh`.
+
+To use a different LLM backend (LM Studio, llama.cpp, etc.), edit `config.json` and set `backend` and `base_url` accordingly. The script will still check for `ollama`; if you use another backend exclusively, you may need to modify the script or install a dummy `ollama` for the check to pass. (Future versions may make this config-aware.)
+
+See [Getting Started](getting-started.md) for backend options.
+
+---
+
 ## "Waiting for state.json from mGBA..."
 
 **Symptom:** The bridge prints "Waiting for state.json from mGBA..." and never advances.
@@ -16,7 +50,7 @@ Common issues and how to fix them.
    # Terminal 1: mGBA
    mgba-qt --script lua/game_agent.lua gamefile/Pokemon_\ FireRed\ Version.zip
    # Terminal 2: bridge (after mGBA is running)
-   source ~/GitHub/venv1/bin/activate && python3 -m bridge
+   source .venv/bin/activate && python3 -m bridge
    ```
 
 2. The bridge writes `lua/data_dir.txt` on startup with the absolute path to `data/`. The Lua script reads this so both use the same folder. If you start mGBA before the bridge, the Lua script falls back to relative `"data"` — which works only when mGBA's working directory is the project root.
@@ -101,16 +135,13 @@ Common issues and how to fix them.
 
 **Fix:**
 
-1. Activate the venv before running:
+1. Use `./startup.sh` — it creates `.venv` and installs dependencies automatically.
+2. If running the bridge manually, activate the project venv:
    ```bash
-   source ~/GitHub/venv1/bin/activate
+   source .venv/bin/activate
    python3 -m bridge
    ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+3. Or set `LATERAL_RED_VENV` to an existing venv path; see [Reference](reference.md).
 
 ---
 *Last updated: 2026-02-21*

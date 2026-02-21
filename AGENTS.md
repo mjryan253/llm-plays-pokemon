@@ -4,6 +4,7 @@
 
 ## 2026-02-21
 
+- **startup.sh install integration**: Script now creates project `.venv`, installs deps, checks mGBA 0.11+, checks Ollama, pauses to prompt starting `ollama serve` (60s countdown or Enter). Halts with doc pointers on mGBA version or Ollama missing. Diátaxis rule added to changelog-and-docs. (startup.sh, docs/getting-started.md, docs/troubleshooting.md, docs/reference.md, README.md, docs/README.md, .cursor/rules/changelog-and-docs.mdc)
 - **Startup script as primary launch option**: Reordered getting-started so Option A is the startup script (recommended for ease-of-use), manual mGBA+bridge launch is Option B. README Quick Start now leads with `./startup.sh`. (docs/getting-started.md, README.md)
 - **Ollama as primary backend**: Default config and docs now target Ollama (port 11434, model qwen2.5:7b). LM Studio moved to Option B in getting-started. (config.json, bridge/llm_client.py, README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md, docs/architecture.md)
 - **ROM documentation**: Clarified that `gamefile/` expects a user-supplied ROM. Noted that one can use any legally owned FireRed or LeafGreen ROM backup. Added DuckDuckGo search guidance for obtaining a backup, with explicit legal-use-only disclaimer. (README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md)

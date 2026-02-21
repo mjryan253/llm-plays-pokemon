@@ -19,4 +19,4 @@ Lateral Red documentation organized by the [Diátaxis](https://diataxis.fr/) fra
 - **Something broken?** → [Troubleshooting](troubleshooting.md)
 
 ---
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*

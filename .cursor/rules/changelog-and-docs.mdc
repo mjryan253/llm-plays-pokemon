@@ -31,3 +31,14 @@ Whenever code is added or modified, update all relevant documentation **in the s
 - **config.json** -- if new config keys are added or defaults change, reflect them in the README and docs/reference.md.
 
 Do not leave documentation describing behavior that no longer exists, or omit documentation for newly added features.
+
+## Diátaxis Structure
+
+When updating documentation, adhere to the [Diátaxis](https://diataxis.fr/) framework used in `docs/`:
+
+- **Tutorial** (getting-started.md): Learning-oriented; step-by-step for first-time users.
+- **How-to** (troubleshooting.md): Problem-oriented; practical fixes for specific issues.
+- **Reference** (reference.md): Technical facts only; config, env vars, structure.
+- **Explanation** (architecture.md): Understanding-oriented; design and philosophy.
+
+Place content in the appropriate doc type and match its style. Do not mix types (e.g. avoid how-to prose in reference, or lengthy explanation in a tutorial step).

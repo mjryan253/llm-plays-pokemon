@@ -44,6 +44,18 @@ All settings live in `config.json` at the project root:
 
 ---
 
+## Environment Variables (startup.sh)
+
+| Variable | Description |
+|----------|-------------|
+| **LATERAL_RED_VENV** | Override venv path. If set and the path exists, the script uses it instead of creating or using `<project>/.venv`. |
+| **LATERAL_RED_NO_TAIL** | Set to `1` to disable spawning a separate terminal for log tail. Same as `--no-tail`. |
+| **LATERAL_RED_TAIL_TERM** | Terminal emulator for tail window (e.g. `gnome-terminal`, `xfce4-terminal`, `konsole`, `xterm`). Auto-detected if unset. |
+
+By default the script creates `<project>/.venv` if it does not exist and runs `pip install -r requirements.txt` inside it.
+
+---
+
 ## Game Modes
 
 The agent detects four game modes and adapts its action space:
@@ -65,6 +77,7 @@ In battle mode, moves with 0 PP are excluded from the action list, and only part
 llm-plays-pokemon/
   config.json               # LLM backend + timing configuration
   startup.sh                # Orchestrated launch (mGBA + bridge)
+  .venv/                    # Project venv (created by startup.sh if missing)
   logs/                     # Log files (LPP-YYYY-MM-DD-HH-MM-SS.txt)
   requirements.txt          # Python dependencies (requests)
   AGENTS.md                 # Changelog of all accepted changes

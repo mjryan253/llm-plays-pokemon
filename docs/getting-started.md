@@ -6,21 +6,15 @@ A step-by-step tutorial for first-time setup and running Lateral Red.
 
 **OS:** Ubuntu / ZorinOS (or any Linux). Python 3.10+.
 
-**mGBA** (v0.10+; 0.11+ required for `--script` auto-load):
+**mGBA** — Minimum 0.11 for `--script` auto-load. The startup script checks the version and halts if below 0.11:
 
 ```bash
 sudo apt install mgba-qt
 ```
 
-**Linux limitation:** The published release (0.10.5) on Linux has `--script` present in the help but **disabled**. For `--script` to work, you need mGBA 0.11+ from the [development downloads](https://mgba.io/downloads.html#development-downloads) (Ubuntu AppImage, or build from source). The current release (0.10.5) supports manual script loading only: **Tools > Scripting > File > Load Script**.
+**Linux limitation:** The published release (0.10.5) on Linux has `--script` **disabled**. For `--script` to work, use mGBA 0.11+ from the [development downloads](https://mgba.io/downloads.html#development-downloads) (Ubuntu AppImage, or build from source). See [Troubleshooting](troubleshooting.md) if the script reports "mGBA version too old".
 
-**Python dependencies:** Use a venv with dependencies installed (e.g. `~/GitHub/venv1`):
-
-```bash
-cd ~/GitHub/llm-plays-pokemon
-source ~/GitHub/venv1/bin/activate
-pip install -r requirements.txt
-```
+**Python:** The startup script creates a project `.venv` and installs dependencies automatically. No manual venv setup needed for the primary path.
 
 **A local LLM backend** (pick one):
 
@@ -50,52 +44,57 @@ pip install -r requirements.txt
 ### 1. Install Prerequisites
 
 ```bash
-# Install mGBA
+# Install mGBA (0.11+ required; packaged 0.10.5 on Linux has --script disabled)
 sudo apt install mgba-qt
+# On Linux: use development downloads for 0.11+ if packaged version is 0.10.x
 
-# Activate venv (must have requirements installed: pip install -r requirements.txt)
-cd ~/GitHub/llm-plays-pokemon  # or your project path
-source ~/GitHub/venv1/bin/activate
-```
-
-On Linux, the published build (0.10.5) does not support `--script` — use [development downloads](https://mgba.io/downloads.html#development-downloads) for mGBA 0.11+ if you want auto-load.
-
-### 2. Start Your LLM Backend
-
-**Option A: Ollama** (recommended)
-
-```bash
+# Install Ollama (default backend)
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull qwen2.5:7b
+```
+
+Place your legally owned FireRed or LeafGreen ROM in `gamefile/` (e.g. `gamefile/Pokemon_ FireRed Version.zip`). See Prerequisites above for ROM notes.
+
+### 2. Run the Startup Script
+
+From the project root:
+
+```bash
+cd ~/GitHub/llm-plays-pokemon  # or your project path
+./startup.sh
+```
+
+The script will:
+
+- Check mGBA is 0.11+ (exits with doc pointers if not)
+- Create `.venv` and install Python dependencies if needed
+- Check Ollama is installed (exits with doc pointers if not)
+- Prompt you to start the Ollama server (press Enter when ready, or wait 60 seconds to auto-continue)
+- Launch mGBA with `--script` and the bridge
+
+```bash
+./startup.sh          # Full launch (mGBA + bridge)
+./startup.sh --quiet  # Same, minimal bridge output
+./startup.sh --no-mgba  # Bridge only (mGBA already running)
+./startup.sh --no-tail  # Skip log tail window (e.g. SSH)
+./startup.sh --no-log   # Skip logging
+```
+
+All output is logged to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt`. With a graphical display, a separate terminal opens with a live `tail -f`. Set `LATERAL_RED_NO_TAIL=1` or use `--no-tail` to disable.
+
+### 3. (Optional) Use a Different LLM Backend
+
+**Ollama** (default) — Start the server before or when prompted:
+
+```bash
 ollama serve  # runs on port 11434
 ```
 
-The `config.json` is already set for Ollama at `localhost:11434` with `qwen2.5:7b`.
+The `config.json` is set for Ollama at `localhost:11434` with `qwen2.5:7b`.
 
-**Option B: LM Studio**
+**LM Studio** — Download from [lmstudio.ai](https://lmstudio.ai), load a model, start the server (port 1234), then edit `config.json`: `"base_url": "http://localhost:1234"`, `"backend": "openai-compat"`.
 
-- Download and install from [lmstudio.ai](https://lmstudio.ai)
-- Load a model (e.g. Qwen 2.5 7B, Llama 3.1 8B)
-- Start the local server (default port 1234)
-- Then edit `config.json` to set `"base_url": "http://localhost:1234"`, `"backend": "openai-compat"`, and optionally remove or change `"model"`.
-
-### 3. Launch mGBA and Bridge
-
-**Option A: Use the Startup Script** (recommended)
-
-The orchestrated script launches mGBA and the bridge together for ease of use:
-
-```bash
-./startup.sh          # Launches mGBA with --script, then bridge (mGBA 0.11+)
-./startup.sh --quiet  # Same, with minimal bridge output
-./startup.sh --no-mgba  # Bridge only (mGBA already running)
-./startup.sh --no-tail  # Skip spawning a separate terminal for log tail (e.g. SSH)
-./startup.sh --no-log   # Skip logging to logs/ (no tee, no tail window)
-```
-
-All output is logged to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt`. When running under a graphical display, a separate terminal window opens with a live `tail -f` of the log. Set `LATERAL_RED_NO_TAIL=1` or use `--no-tail` to disable the tail window.
-
-**Option B: Manual Launch**
+### 4. (Optional) Manual Launch
 
 If you prefer to run mGBA and the bridge in separate terminals:
 
@@ -116,7 +115,7 @@ You should see: "Lateral Red (LR-1) game agent loaded" in the scripting console.
 
 ```bash
 cd ~/GitHub/llm-plays-pokemon
-source ~/GitHub/venv1/bin/activate
+source .venv/bin/activate
 python3 -m bridge
 ```
 
@@ -160,7 +159,7 @@ Each turn shows:
 Run with `--quiet` to show only thinking and action lines:
 
 ```bash
-source ~/GitHub/venv1/bin/activate && python3 -m bridge --quiet
+source .venv/bin/activate && python3 -m bridge --quiet
 ```
 
 ---

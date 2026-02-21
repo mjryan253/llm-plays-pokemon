@@ -7,7 +7,6 @@ set -e
 # ---------------------------------------------------------------------------
 # Configuration (override with environment variables)
 # ---------------------------------------------------------------------------
-VENV="${LATERAL_RED_VENV:-$HOME/GitHub/venv1}"
 ROM_PATH="gamefile/Pokemon_ FireRed Version.zip"
 
 # ---------------------------------------------------------------------------
@@ -15,6 +14,12 @@ ROM_PATH="gamefile/Pokemon_ FireRed Version.zip"
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
+PROJECT_VENV="$PROJECT_ROOT/.venv"
+if [[ -n "$LATERAL_RED_VENV" && -f "$LATERAL_RED_VENV/bin/python" ]]; then
+  VENV="$LATERAL_RED_VENV"
+else
+  VENV="$PROJECT_VENV"
+fi
 
 # Parse flags
 START_MGBA=true
@@ -52,7 +57,7 @@ while [[ $# -gt 0 ]]; do
       echo "  -h, --help   Show this help"
       echo ""
       echo "Environment:"
-      echo "  LATERAL_RED_VENV   Venv path (default: \$HOME/GitHub/venv1)"
+      echo "  LATERAL_RED_VENV   Venv path (default: <project>/.venv)"
       echo "  LATERAL_RED_NO_TAIL  Set to 1 to disable tail window"
       exit 0
       ;;
@@ -155,22 +160,56 @@ echo ""
 # ---------------------------------------------------------------------------
 # Pre-flight checks
 # ---------------------------------------------------------------------------
-echo "[1/6] Resolving project root..."
+echo "[1/9] Resolving project root..."
 echo "      -> $PROJECT_ROOT"
 cd "$PROJECT_ROOT"
 echo ""
 
-echo "[2/6] Checking virtual environment..."
-if [[ ! -f "$VENV/bin/python" ]]; then
-  echo "      ERROR: venv not found at $VENV"
-  echo "      Install deps: $VENV/bin/pip install -r requirements.txt"
+echo "[2/9] Checking mGBA (0.11+ required for --script)..."
+if ! command -v mgba-qt &>/dev/null; then
+  echo "      ERROR: mgba-qt not found in PATH"
+  echo "      Install: sudo apt install mgba-qt"
+  echo "      See docs/getting-started.md and docs/troubleshooting.md"
   exit 1
 fi
-echo "      -> $VENV"
-echo "      -> Python: $($VENV/bin/python --version 2>&1)"
+MGBA_BIN="$(command -v mgba-qt)"
+MGBA_VERSION_RAW="$("$MGBA_BIN" --version 2>/dev/null || echo "0.0")"
+MGBA_VERSION="$(echo "$MGBA_VERSION_RAW" | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
+version_ge() { test "$(printf '%s\n' "$1" "$2" | sort -V | head -1)" = "$2"; }
+if ! version_ge "${MGBA_VERSION:-0}" "0.11"; then
+  echo "      ERROR: mGBA version ${MGBA_VERSION:-unknown} is below 0.11"
+  echo "      --script requires mGBA 0.11+. On Linux, packaged 0.10.5 has --script disabled."
+  echo "      See docs/getting-started.md and docs/troubleshooting.md for mGBA 0.11+ / development downloads."
+  exit 1
+fi
+echo "      -> $MGBA_BIN"
+echo "      -> Version: $MGBA_VERSION"
 echo ""
 
-echo "[3/6] Checking ROM file..."
+echo "[3/9] Setting up virtual environment..."
+if [[ ! -f "$VENV/bin/python" ]]; then
+  echo "      Creating .venv at $PROJECT_VENV"
+  python3 -m venv "$PROJECT_VENV"
+  VENV="$PROJECT_VENV"
+fi
+source "$VENV/bin/activate"
+echo "      -> Installing dependencies..."
+pip install -q -r "$PROJECT_ROOT/requirements.txt"
+echo "      -> $VENV"
+echo "      -> Python: $(python3 --version 2>&1)"
+echo ""
+
+echo "[4/9] Checking Ollama..."
+if ! command -v ollama &>/dev/null; then
+  echo "      ERROR: ollama not found in PATH"
+  echo "      Ollama must be installed for the default LLM backend."
+  echo "      See docs/getting-started.md (Prerequisites, Step 1) for install and setup."
+  exit 1
+fi
+echo "      -> $(command -v ollama)"
+echo ""
+
+echo "[5/9] Checking ROM file..."
 ROM_FULL="$PROJECT_ROOT/$ROM_PATH"
 if [[ ! -f "$ROM_FULL" ]]; then
   echo "      ERROR: ROM not found at $ROM_PATH"
@@ -179,17 +218,7 @@ fi
 echo "      -> $ROM_PATH"
 echo ""
 
-echo "[4/6] Checking mGBA..."
-if ! command -v mgba-qt &>/dev/null; then
-  echo "      ERROR: mgba-qt not found in PATH"
-  echo "      Install: sudo apt install mgba-qt"
-  exit 1
-fi
-MGBA_BIN="$(command -v mgba-qt)"
-echo "      -> $MGBA_BIN"
-echo ""
-
-echo "[5/6] Checking config..."
+echo "[6/9] Checking config..."
 if [[ ! -f "$PROJECT_ROOT/config.json" ]]; then
   echo "      ERROR: config.json not found"
   exit 1
@@ -197,7 +226,7 @@ fi
 echo "      -> config.json"
 echo ""
 
-echo "[6/6] Ensuring data directory and Lua script..."
+echo "[7/9] Ensuring data directory and Lua script..."
 mkdir -p "$PROJECT_ROOT/data"
 if [[ ! -f "$PROJECT_ROOT/lua/game_agent.lua" ]]; then
   echo "      ERROR: lua/game_agent.lua not found"
@@ -205,6 +234,29 @@ if [[ ! -f "$PROJECT_ROOT/lua/game_agent.lua" ]]; then
 fi
 echo "      -> $PROJECT_ROOT/data"
 echo "      -> lua/game_agent.lua"
+echo ""
+
+echo "[8/9] Ollama server..."
+echo "      Please start the Ollama server (ollama serve) if not already running."
+echo "      See docs/getting-started.md for details."
+echo "      Press Enter to continue, or wait 60 seconds to proceed automatically..."
+if [[ -t 0 ]]; then
+  (
+    for ((i=60; i>=0; i-=5)); do
+      echo "      [$i seconds remaining...]"
+      sleep 5
+    done
+  ) &
+  COUNTDOWN_PID=$!
+  read -r -t 60 || true
+  kill "$COUNTDOWN_PID" 2>/dev/null || true
+  wait "$COUNTDOWN_PID" 2>/dev/null || true
+else
+  echo "      Non-interactive mode: skipping pause. Ensure Ollama is already running."
+fi
+echo ""
+
+echo "[9/9] Ready to launch."
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -240,8 +292,7 @@ fi
 echo "───────────────────────────────────────────────────────────────"
 echo "  Starting Bridge (foreground)"
 echo "───────────────────────────────────────────────────────────────"
-echo "  -> Activating venv: $VENV"
-source "$VENV/bin/activate"
+echo "  -> Venv: $VENV (already active)"
 echo "  -> Running: python3 -m bridge $BRIDGE_QUIET"
 echo "  -> Bridge writes lua/data_dir.txt so Lua finds the data folder"
 echo ""
