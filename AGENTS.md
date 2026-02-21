@@ -5,6 +5,7 @@
 ## 2026-02-21
 
 - **ROM documentation**: Clarified that `gamefile/` expects a user-supplied ROM. Noted that one can use any legally owned FireRed or LeafGreen ROM backup. Added DuckDuckGo search guidance for obtaining a backup, with explicit legal-use-only disclaimer. (README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md)
+- **gamefile/ placeholder**: Added `Not-a-real-pokemon-ROM` so the directory exists when cloned. Updated .gitignore to `gamefile/*` with exception for the placeholder, so ROMs/saves stay untracked. (.gitignore, gamefile/Not-a-real-pokemon-ROM)
 
 ## 2026-02-20
 
