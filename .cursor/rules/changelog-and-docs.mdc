@@ -26,7 +26,19 @@ Format:
 Whenever code is added or modified, update all relevant documentation **in the same changeset**:
 
 - **README.md** -- keep setup steps, configuration examples, project structure, and feature descriptions in sync with the current code.
+- **docs/** -- update `docs/getting-started.md`, `docs/architecture.md`, `docs/reference.md`, or `docs/troubleshooting.md` when adding features, config, or architecture.
 - **Inline docstrings / comments** -- update any function or module docstrings that describe behavior you changed.
-- **config.json** -- if new config keys are added or defaults change, reflect them in the README's configuration section.
+- **config.json** -- if new config keys are added or defaults change, reflect them in the README and docs/reference.md.
 
 Do not leave documentation describing behavior that no longer exists, or omit documentation for newly added features.
+
+## Diátaxis Structure
+
+When updating documentation, adhere to the [Diátaxis](https://diataxis.fr/) framework used in `docs/`:
+
+- **Tutorial** (getting-started.md): Learning-oriented; step-by-step for first-time users.
+- **How-to** (troubleshooting.md): Problem-oriented; practical fixes for specific issues.
+- **Reference** (reference.md): Technical facts only; config, env vars, structure.
+- **Explanation** (architecture.md): Understanding-oriented; design and philosophy.
+
+Place content in the appropriate doc type and match its style. Do not mix types (e.g. avoid how-to prose in reference, or lengthy explanation in a tutorial step).

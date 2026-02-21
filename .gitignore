@@ -1,0 +1,43 @@
+# Logs from startup.sh (LPP-YYYY-MM-DD-HH-MM-SS.txt)
+logs/
+
+# User-supplied ROM and save files (not distributable)
+gamefile/*
+!gamefile/Not-a-real-pokemon-ROM
+
+# ---------------------------------------------------------------------------
+# mgba-lua component
+# ---------------------------------------------------------------------------
+# Bridge writes machine-specific absolute path; Lua reads it at runtime
+mgba-lua/lua/data_dir.txt
+# Runtime exchange (state + command) — do not commit
+mgba-lua/data/state.json
+mgba-lua/data/state.json.tmp
+mgba-lua/data/command.json
+mgba-lua/data/command.json.tmp
+
+# ---------------------------------------------------------------------------
+# pygba component
+# ---------------------------------------------------------------------------
+pygba/.venv/
+
+# ---------------------------------------------------------------------------
+# Python (all components)
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/

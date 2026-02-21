@@ -1,5 +1,5 @@
 """
-Lateral Red (LR-1) -- Main Bridge Loop
+LLM Plays Pokemon -- Main Bridge Loop
 
 Polls state.json from the Lua agent, sends the game state to a local LLM,
 parses the response, and writes a button-sequence command back.
@@ -23,7 +23,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
 )
-log = logging.getLogger("lateral-red")
+log = logging.getLogger("llm-plays-pokemon")
 
 # -----------------------------------------------------------------------
 # Terminal colors (ANSI, works on every modern terminal)
@@ -267,7 +267,7 @@ class LoopDetector:
 # -----------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Lateral Red (LR-1) -- Pokemon FireRed AI Bridge")
+    parser = argparse.ArgumentParser(description="LLM Plays Pokemon -- Pokemon FireRed AI Bridge")
     parser.add_argument("-q", "--quiet", action="store_true",
                         help="Minimal output: only show narrative + action per turn")
     args = parser.parse_args()
@@ -275,16 +275,28 @@ def main():
 
     config = load_config()
     data_dir = config.get("data_dir", "data")
-    state_path = os.path.join(data_dir, "state.json")
-    cmd_path = os.path.join(data_dir, "command.json")
+    project_root = os.getcwd()
+    data_dir_abs = os.path.abspath(data_dir)
+    state_path = os.path.join(data_dir_abs, "state.json")
+    cmd_path = os.path.join(data_dir_abs, "command.json")
     poll_interval = config.get("state_poll_interval_seconds", 0.5)
     max_history = config.get("history_length", 10)
+
+    os.makedirs(data_dir_abs, exist_ok=True)
+
+    # So mGBA's Lua script can find the same data dir (when mGBA is run from project root)
+    lua_data_dir_file = os.path.join(project_root, "lua", "data_dir.txt")
+    try:
+        with open(lua_data_dir_file, "w") as f:
+            f.write(data_dir_abs + "\n")
+    except OSError:
+        pass
 
     llm = LLMClient(config.get("llm", {}))
 
     # Startup banner
     print()
-    print(f"{C.BOLD}{C.CYAN}  LATERAL RED (LR-1){C.RESET}")
+    print(f"{C.BOLD}{C.CYAN}  LLM PLAYS POKEMON{C.RESET}")
     print(f"  Autonomous Pokemon FireRed Agent")
     print(_separator("─"))
     print(f"  Backend : {C.BOLD}{llm.backend}{C.RESET} @ {llm.base_url}")

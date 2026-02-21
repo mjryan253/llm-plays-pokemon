@@ -1,10 +1,25 @@
--- Lateral Red (LR-1) -- mGBA Game Agent
+-- LLM Plays Pokemon -- mGBA Game Agent
 -- Reads Pokemon FireRed (US v1.0 / BPRE) RAM, writes state.json, reads command.json
 
 ---------------------------------------------------------------------------
 -- Configuration
+-- Data dir: read from lua/data_dir.txt (written by bridge) so we use the
+-- same absolute path as the Python bridge. If not found, fall back to
+-- relative "data" (requires starting mGBA from project root).
 ---------------------------------------------------------------------------
 local DATA_DIR = "data"
+do
+  local f = io.open("lua/data_dir.txt", "r")
+  if f then
+    local line = f:read("*l")
+    f:close()
+    if line and line ~= "" then
+      DATA_DIR = line:gsub("%s+$", ""):gsub("^%s+", "")
+    end
+  else
+    console:warn("Could not read lua/data_dir.txt. Start mGBA from the project root (e.g. cd llm-plays-pokemon) so the bridge and game agent use the same data folder.")
+  end
+end
 local STATE_FILE = DATA_DIR .. "/state.json"
 local STATE_TMP  = DATA_DIR .. "/state.json.tmp"
 local CMD_FILE   = DATA_DIR .. "/command.json"
@@ -510,7 +525,7 @@ end
 ---------------------------------------------------------------------------
 -- Bootstrap
 ---------------------------------------------------------------------------
-console:log("Lateral Red (LR-1) game agent loaded")
+console:log("LLM Plays Pokemon game agent loaded")
 console:log("State file: " .. STATE_FILE)
 console:log("Command file: " .. CMD_FILE)
 console:log("Polling every " .. FRAME_POLL .. " frames")

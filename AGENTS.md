@@ -1,4 +1,35 @@
-# AGENTS.md -- Lateral Red (LR-1) Changelog
+# AGENTS.md -- LLM Plays Pokemon Changelog
+
+*Last updated: 2026-02-21*
+
+## 2026-02-21
+
+- **Two-component documentation (Phase 3)**: Rewrote root README.md with component comparison table, dual quick-start paths (pygba recommended, mgba-lua legacy), and updated project structure showing both components. Updated all docs/*.md for both components: getting-started.md now has Option A (pygba) and Option B (mgba-lua) sections; architecture.md has side-by-side comparison table and both architectures; reference.md has both config schemas, both field references, both project structures, and pygba-specific RAM addresses; troubleshooting.md labels each issue by component and adds pygba-specific entries (Python bindings not found, dependencies missing). Updated docs/README.md index to reference both components. (README.md, docs/*.md)
+- **PyGBA component (Phase 2)**: Built the pure-Python agent in `pygba/` -- direct mGBA bindings instead of file IPC. Includes: emulator wrapper (`emulator.py`), Gen III RAM reader with badge/money/player-name support (`game_state.py`), streaming LLM client with on_token callback (`llm_client.py`), multi-action prompt builder with progress context and nav hints (`prompt.py`), BFS pathfinding over a ~70-node FireRed map graph (`navigator.py`), hierarchical planner with strategic/tactical/reactive layers (`planner.py`), main agent loop with streaming terminal display (`agent.py`), GBA key/action mapping (`actions.py`), static data tables (`pokemon_data.py`), config, requirements, mGBA build helper (`setup_mgba.sh`), and component README. (pygba/*)
+- **Two-component restructure (Phase 1)**: Moved legacy code (`bridge/`, `lua/`, `data/`, `startup.sh`, `config.json`, `requirements.txt`) into `mgba-lua/` subdirectory. Deleted superseded `guide-doc.md`. Created `mgba-lua/README.md` with component-specific docs. Fixed `startup.sh` paths: ROM via `../gamefile/`, logs via `../logs/`, docs via `../docs/`, added `REPO_ROOT` variable. Updated `.gitignore` for `mgba-lua/` and `pygba/` paths. (mgba-lua/*, .gitignore, README.md, AGENTS.md)
+- **Rebrand to LLM Plays Pokemon**: Replaced "Lateral Red (LR-1)" with "LLM Plays Pokemon" throughout. Env vars `LATERAL_RED_*` renamed to `LPP_*` (LPP = LLM Plays Pokemon). Log prefix `LPP-` kept. (bridge/main.py, lua/game_agent.lua, startup.sh, README.md, AGENTS.md, docs/*.md)
+- **startup.sh install integration**: Script now creates project `.venv`, installs deps, checks mGBA 0.11+, checks Ollama, pauses to prompt starting `ollama serve` (60s countdown or Enter). Halts with doc pointers on mGBA version or Ollama missing. Diátaxis rule added to changelog-and-docs. (startup.sh, docs/getting-started.md, docs/troubleshooting.md, docs/reference.md, README.md, docs/README.md, .cursor/rules/changelog-and-docs.mdc)
+- **Startup script as primary launch option**: Reordered getting-started so Option A is the startup script (recommended for ease-of-use), manual mGBA+bridge launch is Option B. README Quick Start now leads with `./startup.sh`. (docs/getting-started.md, README.md)
+- **Ollama as primary backend**: Default config and docs now target Ollama (port 11434, model qwen2.5:7b). LM Studio moved to Option B in getting-started. (config.json, bridge/llm_client.py, README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md, docs/architecture.md)
+- **ROM documentation**: Clarified that `gamefile/` expects a user-supplied ROM. Noted that one can use any legally owned FireRed or LeafGreen ROM backup. Added DuckDuckGo search guidance for obtaining a backup, with explicit legal-use-only disclaimer. (README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md)
+- **gamefile/ placeholder**: Added `Not-a-real-pokemon-ROM` so the directory exists when cloned. Updated .gitignore to `gamefile/*` with exception for the placeholder, so ROMs/saves stay untracked. (.gitignore, gamefile/Not-a-real-pokemon-ROM)
+
+## 2026-02-20
+
+- **mGBA Linux limitation**: Documented that published mGBA (0.10.5) on Linux has `--script` disabled; users need 0.11+ from [development downloads](https://mgba.io/downloads.html#development-downloads). (README.md, docs/getting-started.md, docs/troubleshooting.md)
+- **Documentation last-updated dates**: Added "Last updated: 2026-02-20" footer to README.md, AGENTS.md, guide-doc.md, and all docs/*.md files.
+- **startup.sh --no-log**: Added `--no-log` flag to skip logging (no tee, no tail window). Logging remains on by default. (startup.sh, README.md, docs/getting-started.md)
+- **startup.sh logging and tail terminal**: All output is teed to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt`. Spawns a separate terminal with `tail -f` (gnome-terminal, xfce4-terminal, konsole, xterm). Added `--no-tail` flag and `LPP_NO_TAIL` env var. `logs/` added to .gitignore. (startup.sh, .gitignore, README.md, docs/getting-started.md, docs/reference.md)
+- **docs/ + Diátaxis restructure**: Reorganized documentation into `docs/` using the Diátaxis framework. Created `getting-started.md`, `architecture.md`, `reference.md`, `troubleshooting.md`, and `docs/README.md` index. Slimmed main README to ~70 lines with links to detailed docs. Superseded `guide-doc.md` with redirect to `docs/architecture.md`. Updated changelog-and-docs rule to include `docs/`. (docs/, README.md, guide-doc.md, .cursor/rules/changelog-and-docs.mdc)
+- **mGBA 0.11 --script**: Integrated mGBA 0.11 `--script FILE` flag to auto-load the Lua game agent on launch. `startup.sh` now passes `--script lua/game_agent.lua`; manual step removed. README updated with `--script` usage and fallback for mGBA 0.10. (startup.sh, README.md)
+
+## 2026-02-19
+
+- **README venv**: Updated Quick Start and Prerequisites to use `~/GitHub/venv1` instead of raw pip install; bridge commands now source the venv before running. (README.md)
+- **startup.sh**: Added orchestrated launch script with verbose pre-flight checks; starts mGBA and bridge, supports `--no-mgba`, `--quiet`, and `LPP_VENV` env var. Cleans up mGBA on Ctrl+C. (startup.sh, README.md)
+- **docs/MGBA_SCRIPTING_REQUEST.md**: Outreach document for mGBA dev team—describes LLM Plays Pokemon use case, --script support in source vs. packaged 0.10.x, questions about availability and build, workaround for building from source. (docs/MGBA_SCRIPTING_REQUEST.md)
+- **docs/MGBA_SUBMISSION_KIT.md**: Submission kit aligned with mGBA CONTRIBUTING.md—checklist, issue template, full copy-paste body for manual submission to mGBA GitHub. (docs/MGBA_SUBMISSION_KIT.md)
+- **.gitignore**: Added Python exclusions (__pycache__/, *.pyc, .venv, .egg-info, etc.). (.gitignore)
 
 ## 2026-02-18
 
@@ -6,3 +37,7 @@
 - **Multi-backend support**: LLM client supports Ollama, LM Studio, llama.cpp, llamafile, and any OpenAI-compatible API via config (`bridge/llm_client.py`)
 - **Model field optional**: `model` can be omitted from `config.json` when the server (e.g. LM Studio) picks the loaded model automatically (`bridge/llm_client.py`, `config.json`)
 - **Verbose CLI output**: Default output shows full game state sent to LLM, raw response, thinking/narrative, and chosen action per turn with color-coded mode headers; `--quiet` flag available for minimal output (`bridge/main.py`)
+- **Package entrypoint**: Added `bridge/__main__.py` so `python3 -m bridge` works as the launch command (`bridge/__main__.py`)
+- **Bridge–mGBA path sync**: Bridge writes absolute data path to `lua/data_dir.txt` on startup; Lua script reads it so both use the same `data/` folder regardless of mGBA's CWD. README updated: start mGBA from project root and added troubleshooting for "Waiting for state.json". (bridge/main.py, lua/game_agent.lua, README.md, .gitignore)
+- **ROM path and quickstart**: Updated README Quick Start with complete command sequence using `gamefile/Pokemon_ FireRed Version.zip`. Added step-by-step setup including LLM backend launch, mGBA launch command with proper path escaping, and bridge startup. Project structure updated to show gamefile directory. (README.md)
+- **README reorganization**: Added Executive Summary section at top with high-level overview and key features. Moved Quick Start to immediately follow Executive Summary for better discoverability. Removed duplicate troubleshooting text. (README.md)
