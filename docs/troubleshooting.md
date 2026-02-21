@@ -33,11 +33,11 @@ Common issues and how to fix them.
 
 **Fix:**
 
-1. **Check the backend is running:** LM Studio must have the local server started. Ollama needs `ollama serve`. llama.cpp/llamafile must be serving.
+1. **Check the backend is running:** Ollama needs `ollama serve`. LM Studio must have the local server started. llama.cpp/llamafile must be serving.
 
 2. **Check `config.json`** `base_url`:
+   - Ollama (default): `http://localhost:11434`
    - LM Studio: `http://localhost:1234`
-   - Ollama: `http://localhost:11434`
    - llama.cpp / llamafile: `http://localhost:8080` (or your configured port)
 
 3. **Ollama native API:** If using `"backend": "ollama"`, set `"model"` (e.g. `"qwen2.5:7b"`). The native Ollama API requires a model name.

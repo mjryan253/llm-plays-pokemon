@@ -4,6 +4,8 @@
 
 ## 2026-02-21
 
+- **Startup script as primary launch option**: Reordered getting-started so Option A is the startup script (recommended for ease-of-use), manual mGBA+bridge launch is Option B. README Quick Start now leads with `./startup.sh`. (docs/getting-started.md, README.md)
+- **Ollama as primary backend**: Default config and docs now target Ollama (port 11434, model qwen2.5:7b). LM Studio moved to Option B in getting-started. (config.json, bridge/llm_client.py, README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md, docs/architecture.md)
 - **ROM documentation**: Clarified that `gamefile/` expects a user-supplied ROM. Noted that one can use any legally owned FireRed or LeafGreen ROM backup. Added DuckDuckGo search guidance for obtaining a backup, with explicit legal-use-only disclaimer. (README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md)
 - **gamefile/ placeholder**: Added `Not-a-real-pokemon-ROM` so the directory exists when cloned. Updated .gitignore to `gamefile/*` with exception for the placeholder, so ROMs/saves stay untracked. (.gitignore, gamefile/Not-a-real-pokemon-ROM)
 

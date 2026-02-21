@@ -26,8 +26,8 @@ pip install -r requirements.txt
 
 | Backend | Install | Default Port |
 |---------|---------|-------------|
+| **Ollama** (recommended) | `curl -fsSL https://ollama.com/install.sh \| sh` | 11434 |
 | **LM Studio** | Download from [lmstudio.ai](https://lmstudio.ai) | 1234 |
-| **Ollama** | `curl -fsSL https://ollama.com/install.sh \| sh` | 11434 |
 | **llama.cpp** | Build from [source](https://github.com/ggerganov/llama.cpp) | 8080 |
 | **llamafile** | Download from [HuggingFace](https://huggingface.co/models?sort=trending&search=llamafile) | 8080 |
 
@@ -62,14 +62,7 @@ On Linux, the published build (0.10.5) does not support `--script` — use [deve
 
 ### 2. Start Your LLM Backend
 
-**Option A: LM Studio** (recommended)
-
-- Download and install from [lmstudio.ai](https://lmstudio.ai)
-- Load a model (e.g. Qwen 2.5 7B, Llama 3.1 8B)
-- Start the local server (default port 1234)
-- The `config.json` is already set for LM Studio at `localhost:1234`
-
-**Option B: Ollama**
+**Option A: Ollama** (recommended)
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -77,9 +70,34 @@ ollama pull qwen2.5:7b
 ollama serve  # runs on port 11434
 ```
 
-Then edit `config.json` to set `"base_url": "http://localhost:11434"` and `"model": "qwen2.5:7b"`.
+The `config.json` is already set for Ollama at `localhost:11434` with `qwen2.5:7b`.
+
+**Option B: LM Studio**
+
+- Download and install from [lmstudio.ai](https://lmstudio.ai)
+- Load a model (e.g. Qwen 2.5 7B, Llama 3.1 8B)
+- Start the local server (default port 1234)
+- Then edit `config.json` to set `"base_url": "http://localhost:1234"`, `"backend": "openai-compat"`, and optionally remove or change `"model"`.
 
 ### 3. Launch mGBA and Bridge
+
+**Option A: Use the Startup Script** (recommended)
+
+The orchestrated script launches mGBA and the bridge together for ease of use:
+
+```bash
+./startup.sh          # Launches mGBA with --script, then bridge (mGBA 0.11+)
+./startup.sh --quiet  # Same, with minimal bridge output
+./startup.sh --no-mgba  # Bridge only (mGBA already running)
+./startup.sh --no-tail  # Skip spawning a separate terminal for log tail (e.g. SSH)
+./startup.sh --no-log   # Skip logging to logs/ (no tee, no tail window)
+```
+
+All output is logged to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt`. When running under a graphical display, a separate terminal window opens with a live `tail -f` of the log. Set `LATERAL_RED_NO_TAIL=1` or use `--no-tail` to disable the tail window.
+
+**Option B: Manual Launch**
+
+If you prefer to run mGBA and the bridge in separate terminals:
 
 **Terminal 1: Start mGBA** (from project root)
 
@@ -102,25 +120,7 @@ source ~/GitHub/venv1/bin/activate
 python3 -m bridge
 ```
 
-The bridge will:
-
-- Connect to your LLM backend
-- Wait for `state.json` from mGBA
-- Once it appears, start the AI playthrough
-
-### 4. Use the Startup Script (Alternative)
-
-The orchestrated script launches mGBA and the bridge together:
-
-```bash
-./startup.sh          # Launches mGBA with --script, then bridge (mGBA 0.11+)
-./startup.sh --quiet  # Same, with minimal bridge output
-./startup.sh --no-mgba  # Bridge only (mGBA already running)
-./startup.sh --no-tail  # Skip spawning a separate terminal for log tail (e.g. SSH)
-./startup.sh --no-log   # Skip logging to logs/ (no tee, no tail window)
-```
-
-All output is logged to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt`. When running under a graphical display, a separate terminal window opens with a live `tail -f` of the log. Set `LATERAL_RED_NO_TAIL=1` or use `--no-tail` to disable the tail window.
+The bridge will connect to your LLM backend, wait for `state.json` from mGBA, and start the AI playthrough once it appears.
 
 ---
 

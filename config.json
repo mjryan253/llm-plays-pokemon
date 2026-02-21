@@ -1,7 +1,8 @@
 {
   "llm": {
-    "backend": "openai-compat",
-    "base_url": "http://localhost:1234",
+    "backend": "ollama",
+    "base_url": "http://localhost:11434",
+    "model": "qwen2.5:7b",
     "temperature": 0.3,
     "max_tokens": 300,
     "api_key": null,

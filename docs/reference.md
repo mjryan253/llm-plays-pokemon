@@ -9,8 +9,9 @@ All settings live in `config.json` at the project root:
 ```json
 {
   "llm": {
-    "backend": "openai-compat",
-    "base_url": "http://localhost:1234",
+    "backend": "ollama",
+    "base_url": "http://localhost:11434",
+    "model": "qwen2.5:7b",
     "temperature": 0.3,
     "max_tokens": 300,
     "api_key": null,
@@ -29,9 +30,9 @@ All settings live in `config.json` at the project root:
 
 | Field | Description |
 |-------|-------------|
-| **backend** | `"openai-compat"` works with LM Studio, Ollama (via `/v1/`), llama.cpp, llamafile. Set to `"ollama"` for the native Ollama `/api/chat` endpoint. |
+| **backend** | `"ollama"` (default) uses native Ollama `/api/chat`. `"openai-compat"` works with LM Studio, Ollama (via `/v1/`), llama.cpp, llamafile. |
 | **base_url** | Host and port of the LLM server. No path — the client appends it. |
-| **model** | Optional. Omit when the server serves one model (LM Studio, llamafile). Required for Ollama native API and multi-model servers. |
+| **model** | Required for Ollama (default backend). Optional for LM Studio, llamafile (single-model servers). |
 | **api_key** | `null` for local backends. Set for cloud APIs. |
 | **temperature** | Lower (0.2–0.4) = more consistent play. Higher = more creative but erratic. |
 | **max_tokens** | Cap on LLM response length. 300 is enough for the JSON output. |

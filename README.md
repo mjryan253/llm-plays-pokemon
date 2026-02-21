@@ -6,7 +6,7 @@ An autonomous Pokemon FireRed agent powered by local LLMs. Uses mGBA's Lua scrip
 
 ## Summary
 
-**Lateral Red (LR-1)** uses "withered technology" — mGBA's Lua API and local LLMs — to play Pokemon FireRed without computer vision. A Lua script reads RAM every 30 frames and writes game state to JSON. A Python bridge polls this, builds mode-aware prompts, and sends them to an LLM (LM Studio, Ollama, llama.cpp, llamafile). The LLM responds with reasoning and an action; the bridge translates that into button sequences for mGBA.
+**Lateral Red (LR-1)** uses "withered technology" — mGBA's Lua API and local LLMs — to play Pokemon FireRed without computer vision. A Lua script reads RAM every 30 frames and writes game state to JSON. A Python bridge polls this, builds mode-aware prompts, and sends them to an LLM (Ollama, LM Studio, llama.cpp, llamafile). The LLM responds with reasoning and an action; the bridge translates that into button sequences for mGBA.
 
 **Key features:**
 - **No computer vision** — reads game state from RAM addresses
@@ -20,11 +20,8 @@ An autonomous Pokemon FireRed agent powered by local LLMs. Uses mGBA's Lua scrip
 ## Quick Start
 
 1. **Prerequisites:** mGBA 0.11+ (on Linux, use [development downloads](https://mgba.io/downloads.html#development-downloads) — packaged 0.10.5 has `--script` disabled), Python 3.10+, venv with `pip install -r requirements.txt`
-2. **LLM:** Start LM Studio (port 1234) or Ollama — see [docs/getting-started.md](docs/getting-started.md)
-3. **mGBA:** `mgba-qt --script lua/game_agent.lua gamefile/Pokemon_\ FireRed\ Version.zip` (from project root)
-4. **Bridge:** `source ~/GitHub/venv1/bin/activate && python3 -m bridge`
-
-**Or use the startup script:** `./startup.sh` (launches mGBA + bridge together). Output is logged to `logs/LPP-YYYY-MM-DD-HH-MM-SS.txt` and, if a display is available, a separate terminal window opens with a live `tail -f` of the log. Use `--no-tail` to disable the tail window or `--no-log` to skip logging entirely (e.g. SSH).
+2. **LLM:** Start Ollama (port 11434) — or LM Studio — see [docs/getting-started.md](docs/getting-started.md)
+3. **Run:** `./startup.sh` (launches mGBA + bridge together; output logged to `logs/`). Use `--no-tail` or `--no-log` if needed. Or launch [manually](docs/getting-started.md#3-launch-mgba-and-bridge) with separate mGBA and bridge terminals.
 
 **Troubleshooting:** Bridge stuck on "Waiting for state.json"? Start both mGBA and the bridge from the project root. See [docs/troubleshooting.md](docs/troubleshooting.md).
 

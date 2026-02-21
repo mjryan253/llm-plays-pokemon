@@ -97,7 +97,7 @@ The bridge warns the LLM when it has been at the same position for 5+ turns or r
 
 ## Model-Agnostic Design
 
-The `model` field is optional in config. LM Studio, llamafile, and single-model servers work without it — the bridge talks to whatever the server is running. Only Ollama's native API and multi-model servers require an explicit model name.
+The `model` field is required for Ollama (the default backend). For LM Studio, llamafile, or other single-model servers, you can omit it — the bridge talks to whatever the server is running.
 
 ---
 
@@ -128,4 +128,4 @@ For contributors extending or rebuilding parts of the system:
 3. Zero human intervention — the human only watches and listens to the narration
 
 ---
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*

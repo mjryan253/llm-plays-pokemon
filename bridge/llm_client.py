@@ -23,8 +23,8 @@ class LLMClient:
     """
 
     def __init__(self, config: dict):
-        self.backend   = config.get("backend", "openai-compat")
-        self.base_url  = config.get("base_url", "http://localhost:1234").rstrip("/")
+        self.backend   = config.get("backend", "ollama")
+        self.base_url  = config.get("base_url", "http://localhost:11434").rstrip("/")
         self.model     = config.get("model")
         self.temp      = config.get("temperature", 0.3)
         self.max_tok   = config.get("max_tokens", 300)
