@@ -72,8 +72,8 @@ llm-plays-pokemon/
     architecture.md         # System design and philosophy
     reference.md            # This file
     troubleshooting.md      # Common issues and fixes
-  gamefile/
-    Pokemon_ FireRed Version.zip  # ROM file (mGBA loads directly from ZIP)
+  gamefile/                       # Place your legally owned FireRed/LeafGreen ROM here
+    (user-supplied .zip or .gba)  # mGBA loads directly from ZIP; see getting-started for backup notes
   lua/
     game_agent.lua          # mGBA Lua script (RAM reader, decrypter, command executor)
   bridge/
@@ -110,4 +110,4 @@ The Lua script reads these memory addresses. Values are in the game's native for
 Player X/Y and other derived values are read via SaveBlock pointers. See [lua/game_agent.lua](../lua/game_agent.lua) for full implementation.
 
 ---
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*

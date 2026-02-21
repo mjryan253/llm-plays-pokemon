@@ -41,7 +41,7 @@ pip install -r requirements.txt
 | Phi-3 Mini 3.8B Q4_K_M | ~2.4 GB | Fits 8 GB RAM easily |
 | Gemma 2 2B | ~1.6 GB | Minimal footprint for constrained hardware |
 
-**Pokemon FireRed ROM** (US v1.0, game code BPRE) — included in `gamefile/Pokemon_ FireRed Version.zip`. mGBA loads ROMs directly from ZIP archives.
+**Pokemon ROM** — The `gamefile/` folder is where the script expects your ROM. Place your legally owned FireRed or LeafGreen ROM backup here (e.g. `gamefile/Pokemon_ FireRed Version.zip`). mGBA loads ROMs directly from ZIP archives. You may use this project with any legally owned game ROM backup. If you need a backup and cannot find one, a [DuckDuckGo search for "pokemon gba rom"](https://duckduckgo.com/?q=pokemon+gba+rom) will lead to sites where you can download a ROM backup — **only** of a game you legally own.
 
 ---
 
@@ -172,4 +172,4 @@ source ~/GitHub/venv1/bin/activate && python3 -m bridge --quiet
 - [Troubleshooting](troubleshooting.md) — common issues and fixes
 
 ---
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*

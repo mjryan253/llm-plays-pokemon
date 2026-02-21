@@ -75,7 +75,7 @@ Common issues and how to fix them.
 
 **Cause:** Lateral Red targets **Pokemon FireRed US v1.0** (game code BPRE). Other ROMs (Ruby, Sapphire, Emerald, non-US) use different memory layouts.
 
-**Fix:** Use the included `gamefile/Pokemon_ FireRed Version.zip` or a FireRed US v1.0 ROM with the BPRE code.
+**Fix:** Use a FireRed or LeafGreen US v1.0 ROM (game code BPRE/BPGE) in `gamefile/`. See [Getting Started](getting-started.md#prerequisites) for notes on obtaining a legally owned ROM backup.
 
 ---
 
@@ -113,4 +113,4 @@ Common issues and how to fix them.
    ```
 
 ---
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*

@@ -1,6 +1,10 @@
 # AGENTS.md -- Lateral Red (LR-1) Changelog
 
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*
+
+## 2026-02-21
+
+- **ROM documentation**: Clarified that `gamefile/` expects a user-supplied ROM. Noted that one can use any legally owned FireRed or LeafGreen ROM backup. Added DuckDuckGo search guidance for obtaining a backup, with explicit legal-use-only disclaimer. (README.md, docs/getting-started.md, docs/reference.md, docs/troubleshooting.md)
 
 ## 2026-02-20
 

@@ -43,6 +43,7 @@ An autonomous Pokemon FireRed agent powered by local LLMs. Uses mGBA's Lua scrip
 llm-plays-pokemon/
   config.json          # LLM backend + timing
   startup.sh           # Orchestrated launch
+  gamefile/            # Place your legally owned FireRed/LeafGreen ROM here (see docs)
   lua/game_agent.lua   # mGBA script (RAM reader, command executor)
   bridge/              # Python: main loop, LLM client, prompts
   data/                # state.json, command.json (runtime)
@@ -52,4 +53,4 @@ llm-plays-pokemon/
 See [docs/reference.md](docs/reference.md) for full structure and config details.
 
 ---
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-21*
