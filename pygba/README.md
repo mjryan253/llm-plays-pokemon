@@ -65,10 +65,36 @@ Place your ROM in `../gamefile/` (see the root README for ROM guidance).
 
 ## Usage
 
+### Recommended: Startup Script
+
+```bash
+cd pygba
+./startup.sh
+```
+
+`startup.sh` performs preflight checks and then launches the agent:
+
+- Creates/uses `pygba/.venv` (or `LPP_VENV`) and installs requirements
+- Validates `pygba/config.json` and `rom_path`
+- Verifies mGBA bindings (`import mgba.core`)
+- Checks Ollama binary when `llm.backend` is `"ollama"`
+- Logs output to `../logs/LPP-YYYY-MM-DD-HH-MM-SS.txt` (unless `--no-log`)
+
+Flags:
+
+```bash
+./startup.sh --no-tail
+./startup.sh --no-log
+./startup.sh --quiet
+```
+
+### Manual
+
 From the repository root:
 
 ```bash
-python -m pygba
+cd pygba
+PYTHONPATH=.. python -m pygba
 ```
 
 The agent runs headless -- all output goes to the terminal:

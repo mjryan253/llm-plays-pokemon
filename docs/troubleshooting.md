@@ -22,7 +22,7 @@ See [Getting Started](getting-started.md) Option B prerequisites for more detail
 
 ## mGBA Python Bindings Not Found (pygba)
 
-**Symptom:** `python -m pygba` fails with `ModuleNotFoundError: No module named 'mgba'`.
+**Symptom:** `./startup.sh` exits with "mGBA Python bindings not found" (or `python -m pygba` fails with `ModuleNotFoundError: No module named 'mgba'`).
 
 **Cause:** The standard mGBA package does not include Python bindings. You must build mGBA from source with `-DBUILD_PYTHON=ON`.
 
@@ -45,7 +45,7 @@ See [Getting Started](getting-started.md) Option A for full instructions.
 
 ## Ollama Not Installed (Both)
 
-**Symptom:** mgba-lua's `./startup.sh` exits with "ollama not found in PATH". pygba fails to connect to LLM.
+**Symptom:** `startup.sh` exits with "ollama not found in PATH", or agent/bridge cannot reach LLM.
 
 **Cause:** The default config uses Ollama. The mgba-lua script checks for `ollama` before launch.
 
@@ -55,7 +55,7 @@ See [Getting Started](getting-started.md) Option A for full instructions.
 2. Pull a model: `ollama pull qwen2.5:7b`
 3. Start the server: `ollama serve`
 
-To use a different LLM backend, edit the component's `config.json` and set `backend` and `base_url` accordingly. See [Getting Started](getting-started.md) for backend options.
+To use a different LLM backend, edit the component's `config.json` and set `backend` and `base_url` accordingly. For pygba, `./startup.sh` skips the Ollama binary check when `llm.backend` is not `"ollama"`. See [Getting Started](getting-started.md) for backend options.
 
 ---
 
@@ -172,7 +172,7 @@ To use a different LLM backend, edit the component's `config.json` and set `back
 
 ## pygba Dependencies Missing (pygba)
 
-**Symptom:** `python -m pygba` fails with `ModuleNotFoundError` for `requests` or similar.
+**Symptom:** `./startup.sh` or `python -m pygba` fails with `ModuleNotFoundError` for `requests` or similar.
 
 **Fix:**
 

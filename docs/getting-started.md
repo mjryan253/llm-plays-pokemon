@@ -57,26 +57,42 @@ sudo make install && sudo ldconfig
 python3 -c "import mgba.core"  # verify
 ```
 
-### 2. Install Dependencies
+### 2. Run the Startup Script (Recommended)
 
 ```bash
 cd pygba
+./startup.sh
+```
+
+The launcher will:
+
+- Create `pygba/.venv` and install dependencies if needed
+- Validate `pygba/config.json` and `rom_path`
+- Check `import mgba.core` (fails with setup guidance if bindings are missing)
+- Check `ollama` is installed when `llm.backend` is `"ollama"`
+- Prompt you to start `ollama serve` (press Enter to continue, or wait 60 seconds)
+- Launch `python -m pygba` in the foreground
+
+Optional flags:
+
+```bash
+./startup.sh --no-tail  # Skip log tail window (e.g. SSH)
+./startup.sh --no-log   # Skip logging
+./startup.sh --quiet    # Reduce startup-script output
+```
+
+### 3. (Optional) Manual Launch
+
+If you prefer to run without the startup script:
+
+```bash
+cd pygba
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-### 3. Start the LLM Backend
-
-```bash
 ollama pull qwen2.5:7b
-ollama serve  # runs on port 11434
-```
-
-### 4. Run the Agent
-
-From the repository root:
-
-```bash
-python -m pygba
+ollama serve  # in another terminal
+PYTHONPATH=.. python -m pygba
 ```
 
 The agent runs headless — all output goes to the terminal with a streaming display:

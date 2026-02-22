@@ -98,6 +98,25 @@ LPP = LLM Plays Pokemon. By default the script creates `mgba-lua/.venv` if it do
 
 ---
 
+## Environment Variables (pygba/startup.sh)
+
+| Variable | Description |
+|----------|-------------|
+| **LPP_VENV** | Override venv path. If set and the path exists, the script uses it instead of creating `pygba/.venv`. |
+| **LPP_NO_TAIL** | Set to `1` to disable spawning a separate terminal for log tail. Same as `--no-tail`. |
+| **LPP_TAIL_TERM** | Terminal emulator for tail window (e.g. `gnome-terminal`, `xfce4-terminal`, `konsole`, `xterm`). Auto-detected if unset. |
+
+`pygba/startup.sh` flags:
+
+- `--no-tail` Skip log tail terminal
+- `--no-log` Skip file logging and tail
+- `--quiet` Reduce launcher output verbosity
+- `-h`, `--help` Show usage
+
+By default the script creates `pygba/.venv` if needed, installs `pygba/requirements.txt`, validates `pygba/config.json`, checks `mgba.core`, and launches `python -m pygba`.
+
+---
+
 ## Game Modes
 
 Both components detect four game modes and adapt the action space:
@@ -136,6 +155,7 @@ llm-plays-pokemon/
     config.json                # ROM path, LLM, planner settings
     requirements.txt           # Python deps (requests)
     setup_mgba.sh              # Build mGBA with Python bindings
+    startup.sh                 # Orchestrated launch for pygba
     __init__.py
     __main__.py                # Entry: python -m pygba
     agent.py                   # Main loop + streaming terminal display

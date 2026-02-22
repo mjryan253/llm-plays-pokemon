@@ -22,10 +22,10 @@ Both components read game memory directly — no computer vision — and feed st
 Requires mGBA built with Python bindings (see [pygba/README.md](pygba/README.md) or run `bash pygba/setup_mgba.sh`).
 
 ```bash
-cd pygba && pip install -r requirements.txt
-ollama pull qwen2.5:7b && ollama serve   # in another terminal
-python -m pygba
+cd pygba && ./startup.sh
 ```
+
+The launcher performs preflight checks (venv/deps, `mgba.core`, config/ROM path, Ollama binary) and then starts `python -m pygba`.
 
 **Option B — mgba-lua** (legacy):
 
